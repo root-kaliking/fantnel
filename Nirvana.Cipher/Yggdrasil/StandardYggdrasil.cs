@@ -77,9 +77,9 @@ public static class StandardYggdrasil {
             return Result<byte[]>.Failure("Empty response");
         }
 
-        var status = (byte)response.ReadByte();
+        var status = response.ReadByte();
 
-        return status != 0x00 ? Result<byte[]>.Failure($"Initialization failed with status: 0x{status:X2}") : Result<byte[]>.Success(loginSeed);
+        return status != 0 ? Result<byte[]>.Failure($"Initialization failed with status: 0x{status:X2}") : Result<byte[]>.Success(loginSeed);
     }
 
     private static async Task<Result> MakeRequest(NetworkStream stream, GameProfile profile, string serverId, byte[] loginSeed)
