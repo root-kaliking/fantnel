@@ -34,7 +34,7 @@ public class CacheManager {
                         try {
                             if (RentalGameMessage.ServerList.Count < 20) {
                                 Log.Information("正在开始缓存 Rental 服务器列表");
-                                RentalGameMessage.GetServerList(0, 250);
+                                RentalGameMessage.GetServerList(0, 50);
                             }
                         } catch (Exception e) {
                             Log.Error("顶缓存 Rental 出错 : {0}", e.Message);
@@ -44,7 +44,7 @@ public class CacheManager {
                         try {
                             if (ServersGameMessage.ServerList.Count < 20) {
                                 Log.Information("正在开始缓存 Net 服务器列表");
-                                ServersGameMessage.GetServerListTo(0, 130);
+                                ServersGameMessage.GetServerListTo(0, 50);
                             }
                         } catch (Exception e) {
                             Log.Error("顶缓存 Net 出错 : {0}", e.Message);
@@ -54,7 +54,7 @@ public class CacheManager {
                         try {
                             if (SkinMessage.SkinList.Count < 20) {
                                 Log.Information("正在开始缓存 Skin 服务器列表");
-                                SkinMessage.GetSkinList(0, 300).Wait();
+                                SkinMessage.GetSkinList(0, 50).Wait();
                             }
                         } catch (Exception e) {
                             Log.Error("顶缓存 Skin 出错 : {0}", e.Message);

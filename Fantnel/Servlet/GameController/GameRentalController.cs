@@ -30,7 +30,7 @@ public class GameRentalController : ControllerBase {
         // 全部账号
         var accounts = AccountMessage.GetLoginAccountList();
         // 全部游戏角色
-        var games = NPFLauncher.GetRentalGameRolesListAsync(id).Result;
+        var games = NPFLauncher.GetRentalGameRolesListAsync(id).GetAwaiter().GetResult();
         // 合并
         var text = new {
             accounts,

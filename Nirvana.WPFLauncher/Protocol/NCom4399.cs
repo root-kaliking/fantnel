@@ -14,6 +14,11 @@ public static class NCom4399 {
         CookieContainer = new CookieContainer()
     });
 
+    public static string LoginWithPassword(string username, string password, string sessionId, string captcha)
+    {
+        return LoginWithPasswordAsync(username, password, sessionId, captcha).GetAwaiter().GetResult();
+    }
+
     public static async Task<string> LoginWithPasswordAsync(string username, string password, string sessionId, string captcha)
     {
         var oauthResp = await Client.GetAsync("https://m.4399api.com/openapi/oauth-callback.html?gamekey=44770&game_key=115716");
@@ -57,6 +62,8 @@ public static class NCom4399 {
         }
 
         var entity4399UserInfoResult = userInfoResponse.Result;
+
+        // ReSharper disable once ConvertIfStatementToReturnStatement
         if (entity4399UserInfoResult == null) {
             throw new Exception("Failed to deserialize: " + loginText);
         }
@@ -71,12 +78,16 @@ public static class NCom4399 {
         const string endMarker = "</p>";
 
         var startIndex = html.IndexOf(startMarker, StringComparison.Ordinal);
-        if (startIndex == -1) return string.Empty;
+        if (startIndex == -1) {
+            return string.Empty;
+        }
 
         startIndex += startMarker.Length;
         var endIndex = html.IndexOf(endMarker, startIndex, StringComparison.Ordinal);
 
-        if (endIndex == -1) return string.Empty;
+        if (endIndex == -1) {
+            return string.Empty;
+        }
 
         // 提取内容并删除前后空格
         var content = html.Substring(startIndex, endIndex - startIndex);

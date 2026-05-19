@@ -63,7 +63,7 @@ public class CommandService {
         // windows 不需要修复 lwjgl
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
             // 获取原版信息
-            var minecraft = X19Extensions.Bmcl.Api<Dictionary<string, JsonElement>>($"/version/{_version}/json").Result;
+            var minecraft = X19Extensions.Bmcl.Api<Dictionary<string, JsonElement>>($"/version/{_version}/json").GetAwaiter().GetResult();
             if (minecraft != null) {
                 _minecraft = BuildJarListBase(minecraft);
             } else {
@@ -444,7 +444,7 @@ public class CommandService {
         }
 
         // 添加 验证信息
-        var stringBuilder = new StringBuilder().Append(" -Xmx").Append(NirvanaConfig.GetString("gameMemory")).Append("M ").Append(NirvanaConfig.GetString("jvmArgs")).Append($" -DlauncherControlPort={socketPort}").Append($" -DlauncherGameId={_launcherGame.GameId}").Append($" -DuserId={_launcherGame.Account.GetUserId()}").Append($" -DToken={TokenUtil.GenerateEncryptToken(_launcherGame.Account.GetToken())}").Append(" -DServer=RELEASE").Append(AddNativePath());
+        var stringBuilder = new StringBuilder().Append(" -Xmx").Append(NirvanaConfig.GetValue<string>("gameMemory")).Append("M ").Append(NirvanaConfig.GetValue<string>("jvmArgs")).Append($" -DlauncherControlPort={socketPort}").Append($" -DlauncherGameId={_launcherGame.GameId}").Append($" -DuserId={_launcherGame.Account.GetUserId()}").Append($" -DToken={TokenUtil.GenerateEncryptToken(_launcherGame.Account.GetToken())}").Append(" -DServer=RELEASE").Append(AddNativePath());
 
         jvmArguments = GameArgumentsUtil.AddArguments(stringBuilder.ToString(), jvmArguments); // 添加 修复参数
 

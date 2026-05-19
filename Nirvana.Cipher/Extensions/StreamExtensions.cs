@@ -15,11 +15,13 @@ public static class StreamExtensions {
             if (bytesRead != 2) {
                 throw new EndOfStreamException("Could not read the length prefix.");
             }
+
             var length = BitConverter.ToInt16(lengthBytes, 0);
 
             if (length < 0) {
                 throw new InvalidDataException("Length cannot be negative.");
             }
+
             var memoryStream = new MemoryStream(length);
 
             var buffer = new byte[1024];

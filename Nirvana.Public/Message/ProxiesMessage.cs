@@ -52,7 +52,7 @@ public static class ProxiesMessage {
             var address = await NPFLauncher.GetNetGameServerAddressAsync(id);
 
             // NThread.Start(() => {
-            //     address = NPFLauncher.GetNetGameServerAddressAsync(id).Result;
+            //     address = NPFLauncher.GetNetGameServerAddressAsync(id).GetAwaiter().GetResult();
             // });
 
             // 服务器版本

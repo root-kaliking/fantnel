@@ -12,7 +12,7 @@ public class GameSkinController : ControllerBase {
     [HttpGet("/api/gameskin/get")]
     public IActionResult GetServerHttp([FromQuery] int offset = 0, [FromQuery] int pageSize = 10, [FromQuery] string? name = null)
     {
-        var entity = name == null ? SkinMessage.GetSkinList(offset, pageSize).Result : SkinMessage.GetSkinListByName(name, offset, pageSize).Result;
+        var entity = name == null ? SkinMessage.GetSkinList(offset, pageSize).GetAwaiter().GetResult() : SkinMessage.GetSkinListByName(name, offset, pageSize).GetAwaiter().GetResult();
         return Ok(Code.ToJson(ErrorCode.Success, entity));
     }
 

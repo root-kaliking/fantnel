@@ -1,5 +1,4 @@
 using System;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -154,9 +153,7 @@ public sealed class LauncherService : IDisposable {
         var commandService = new CommandService();
         var availablePort = Tools.GetUnusedPort(11413);
 
-        if (_skip32 == null) {
-            throw new NoNullAllowedException(nameof(_skip32));
-        }
+        ArgumentNullException.ThrowIfNull(_skip32);
 
         commandService.Init(enumVersion, Entity, workingDirectory, _skip32.GenerateRoleUuid(Entity.RoleName, Convert.ToUInt32(Entity.Account.GetUserId())), _socketPort, X19.GameVersion, availablePort);
 
@@ -208,6 +205,7 @@ public sealed class LauncherService : IDisposable {
         if (_disposed) {
             return;
         }
+
         if (disposing) {
             try {
                 _authLibProtocol?.Dispose();
@@ -220,7 +218,7 @@ public sealed class LauncherService : IDisposable {
                 Log.Warning(ex, "Error occurred during disposal");
             }
         }
+
         _disposed = true;
     }
-
 }

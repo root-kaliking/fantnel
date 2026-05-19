@@ -11,7 +11,7 @@ public class PluginsShopController : ControllerBase {
     [HttpGet("/api/pluginstore/get")]
     public IActionResult GetPluginListHttp()
     {
-        var pluginList = PlugInstoreMessage.GetPluginList().Result;
+        var pluginList = PlugInstoreMessage.GetPluginList().GetAwaiter().GetResult();
         return Ok(Code.ToJson(ErrorCode.Success, pluginList));
     }
 

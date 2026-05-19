@@ -16,6 +16,7 @@ public class SocketCallback {
         if (!_receiveCallbacks.TryGetValue(sid, out var value)) {
             return;
         }
+
         value(parameters);
     }
 }

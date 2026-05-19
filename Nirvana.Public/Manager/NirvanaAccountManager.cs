@@ -55,9 +55,9 @@ public static class NirvanaAccountManager {
         }
 
         var config = new EntityAccountNirvanaConfig {
-            Account = NirvanaConfig.GetString("account"),
+            Account = NirvanaConfig.GetValue<string>("account"),
             Days = _days.Value,
-            HideAccount = NirvanaConfig.GetBool("hideAccount")
+            HideAccount = NirvanaConfig.GetValue<bool>("hideAccount")
         };
 
         if (config.HideAccount) {
@@ -92,7 +92,7 @@ public static class NirvanaAccountManager {
     public static void SetChatEnable(string? value)
     {
         NirvanaConfig.SetValue("chatEnable", value);
-        if (NirvanaConfig.GetBool("chatEnable")) {
+        if (NirvanaConfig.GetValue<bool>("chatEnable")) {
             // _ = ChatMessage.StartAsync();
         }
         // ChatMessage.Shutdown();

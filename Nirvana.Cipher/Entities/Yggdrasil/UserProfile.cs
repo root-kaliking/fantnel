@@ -7,14 +7,13 @@ using NirvanaAPI.Entities.Login;
 namespace Nirvana.Cipher.Entities.Yggdrasil;
 
 public class UserProfile {
-    
-    [JsonPropertyName("user")]
-    public required EntityUserInfo User { get; set; }
-    
     private static readonly byte[] TokenKey = [
         0xAC, 0x24, 0x9C, 0x69, 0xC7, 0x2C, 0xB3, 0xB4,
         0x4E, 0xC0, 0xCC, 0x6C, 0x54, 0x3A, 0x81, 0x95
     ];
+
+    [JsonPropertyName("user")]
+    public required EntityUserInfo User { get; set; }
 
     public int GetUserId()
     {

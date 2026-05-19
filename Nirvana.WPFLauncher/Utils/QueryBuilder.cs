@@ -7,10 +7,7 @@ namespace Nirvana.WPFLauncher.Utils;
 public class QueryBuilder {
     private readonly Dictionary<string, string> _parameters = new();
 
-    public QueryBuilder()
-    {
-        
-    }
+    public QueryBuilder() { }
 
     public QueryBuilder(string queryString)
     {

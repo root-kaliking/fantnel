@@ -10,9 +10,11 @@ public static class RandomUtil {
         if (length <= 0) {
             return string.Empty;
         }
-        if (string.IsNullOrEmpty(chars)){
+
+        if (string.IsNullOrEmpty(chars)) {
             chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghizklmnopqrstuvwxyz0123456789";
         }
+
         var stringBuilder = new StringBuilder(length);
         var data = new byte[length];
         RandomNumberGenerator.Fill((Span<byte>)data);
@@ -20,7 +22,7 @@ public static class RandomUtil {
             var index2 = data[index1] % chars.Length;
             stringBuilder.Append(chars[index2]);
         }
+
         return stringBuilder.ToString();
     }
-
 }

@@ -579,67 +579,6 @@ games: 优先账号 的 角色信息 [切换优先账号，会导致games改变]
   "msg": "成功"
 }
 
-/api/nirvana/set?mode=hideAccount&value=${true/false} : 设置是否隐藏账号
-{
-  "code": 1,
-  "msg": "成功"
-}
-
-/api/nirvana/set?mode=chatEnable&value=${true/false} : 设置是否启用游戏聊天室
-{
-  "code": 1,
-  "msg": "成功"
-}
-
-/api/nirvana/set?mode=gameMemory&value=${内存} : 设置启动游戏最大内存
-Min GameMemory = 1024
-{
-  "code": 1,
-  "msg": "成功"
-}
-
-/api/nirvana/set?mode=jvmArgs&value=${参数} : 设置启动游戏-JVM参数
-{
-  "code": 1,
-  "msg": "成功"
-}
-
-/api/nirvana/set?mode=gameArgs&value=${参数} : 设置启动游戏-游戏参数
-{
-  "code": 1,
-  "msg": "成功"
-}
-
-/api/nirvana/set?mode=autoLoginGame&value=${true/false} : 是否开启主动登录游戏账号
-{
-  "code": 1,
-  "msg": "成功"
-}
-
-/api/nirvana/set?mode=autoLoginGame163Email&value=${true/false} : 是否开启主动登录 163Email 游戏账号
-{
-  "code": 1,
-  "msg": "成功"
-}
-
-/api/nirvana/set?mode=autoLoginGameCookie&value=${true/false} : 是否开启主动登录 Cookie 游戏账号
-{
-  "code": 1,
-  "msg": "成功"
-}
-
-/api/nirvana/set?mode=useJavaW&value=${true/false} : 是否使用 JavaW 启动游戏
-{
-  "code": 1,
-  "msg": "成功"
-}
-
-/api/nirvana/set?mode=autoUpdatePlugin&value=${true/false} : 是否自动更新插件
-{
-  "code": 1,
-  "msg": "成功"
-}
-
 /api/nirvana/get : 获取配置信息
 {
   "code": 1,
@@ -657,11 +596,23 @@ Min GameMemory = 1024
 }
 
 /api/nirvana/add?name=${配置名}&value=${配置值}&property=${配置属性名} : 添加配置选项
-/api/nirvana/set?mode=testint&value=1231&property=int
-/api/nirvana/set?mode=testbool&value=false&property=bool
-/api/nirvana/set?mode=testdouble&value=1231.0&property=double
-/api/nirvana/set?mode=testfloat&value=1231.0&property=float
-/api/nirvana/set?mode=teststring&value=adas&property=string
+property[string, double, float, bool, int, json]
+{
+  "code": 1,
+  "msg": "成功"
+}
+
+/api/nirvana/set?mode=${配置名}&value=${配置值}: 设置配置选项
+/api/nirvana/set?mode=hideAccount&value=${true/false} : 设置是否隐藏账号
+/api/nirvana/set?mode=chatEnable&value=${true/false} : 设置是否启用游戏聊天室
+/api/nirvana/set?mode=gameMemory&value=${内存} : 设置启动游戏最大内存 [Min = 1024]
+/api/nirvana/set?mode=jvmArgs&value=${参数} : 设置启动游戏-JVM参数
+/api/nirvana/set?mode=gameArgs&value=${参数} : 设置启动游戏-游戏参数
+/api/nirvana/set?mode=autoLoginGame&value=${true/false} : 是否开启主动登录游戏账号
+/api/nirvana/set?mode=autoLoginGame163Email&value=${true/false} : 是否开启主动登录 163Email 游戏账号
+/api/nirvana/set?mode=autoLoginGameCookie&value=${true/false} : 是否开启主动登录 Cookie 游戏账号
+/api/nirvana/set?mode=useJavaW&value=${true/false} : 是否使用 JavaW 启动游戏
+/api/nirvana/set?mode=autoUpdatePlugin&value=${true/false} : 是否自动更新插件
 {
   "code": 1,
   "msg": "成功"

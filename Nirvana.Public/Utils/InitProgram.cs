@@ -74,11 +74,9 @@ public static class InitProgram {
                 // ignored
             }
         });
-        
+
         // 提前获取验证服务器
-        _ = Task.Run(() => {
-            _ = StandardYggdrasil.InitializationAsync();
-        });
+        _ = Task.Run(() => { _ = StandardYggdrasil.InitializationAsync(); });
 
         foreach (var arg in args) {
             if ("--authenticated_false".Equals(arg)) {
@@ -86,7 +84,6 @@ public static class InitProgram {
                 break;
             }
         }
-        
     }
 
     /**

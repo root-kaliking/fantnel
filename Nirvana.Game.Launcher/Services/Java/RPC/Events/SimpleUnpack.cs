@@ -6,7 +6,6 @@ using System.Text;
 namespace Nirvana.Game.Launcher.Services.Java.RPC.Events;
 
 public class SimpleUnpack(byte[] bytes) {
-    
     private int _index;
 
     private ushort _lastLength;

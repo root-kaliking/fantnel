@@ -86,8 +86,6 @@ public static class PacketManager {
                     }
                 }
             }
-
-
         }
 
         return list.ToArray();

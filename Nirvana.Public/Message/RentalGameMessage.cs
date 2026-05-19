@@ -89,7 +89,7 @@ public static class RentalGameMessage {
     private static void AddServerList(EntityRentalGame[] gameItem)
     {
         foreach (var item in gameItem) {
-            var details = NPFLauncher.GetRentalGameDetailsAsync(item.EntityId).Result;
+            var details = NPFLauncher.GetRentalGameDetailsAsync(item.EntityId).GetAwaiter().GetResult();
             AddServerList(details);
         }
     }

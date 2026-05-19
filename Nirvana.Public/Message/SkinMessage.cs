@@ -102,7 +102,7 @@ public static class SkinMessage {
 
     public static async Task<EntityQueryNetSkinItem[]> GetSkinListByName(string name, int offset = 0, int pageSize = 10)
     {
-        var result = NPFLauncher.GetFreeSkinByNameAsync(name, offset, pageSize).Result;
+        var result = NPFLauncher.GetFreeSkinByNameAsync(name, offset, pageSize).GetAwaiter().GetResult();
 
         var items = new List<EntityQueryNetSkinItem>();
         foreach (var item in result) {

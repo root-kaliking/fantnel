@@ -36,7 +36,7 @@ public static class Program {
 
         var builder = WebApplication.CreateBuilder(args);
         builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
-        
+
         // 设置默认编码为UTF-8
         Console.OutputEncoding = Encoding.UTF8;
 

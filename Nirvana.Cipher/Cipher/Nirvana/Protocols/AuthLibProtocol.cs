@@ -31,6 +31,7 @@ public class AuthLibProtocol(IPAddress address, int port, string modList, string
         if (_disposed) {
             return;
         }
+
         if (disposing) {
             _cts.Cancel();
             _listener?.Stop();
@@ -61,7 +62,7 @@ public class AuthLibProtocol(IPAddress address, int port, string modList, string
     {
         while (!token.IsCancellationRequested && !_disposed)
             try {
-                if (_listener != null){
+                if (_listener != null) {
                     await HandleClientAsync(await _listener.AcceptTcpClientAsync(token).ConfigureAwait(false), token);
                 }
             } catch (ObjectDisposedException) {
@@ -108,7 +109,7 @@ public class AuthLibProtocol(IPAddress address, int port, string modList, string
                 var serverIdBuf = new byte[serverIdLen];
                 await ReadExactAsync(stream, serverIdBuf, 0, serverIdLen, token);
                 var serverId = Encoding.UTF8.GetString(serverIdBuf);
-                
+
                 await NetEaseConnection.CreateAuthenticatorAsync(serverId, gameId, version, modList, account, success => {
                     if (success) {
                         responseCode = 0u;

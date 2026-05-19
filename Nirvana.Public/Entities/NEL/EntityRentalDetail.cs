@@ -20,7 +20,7 @@ public class EntityRentalDetail {
                         return;
                     }
 
-                    var item = NPFLauncher.GetRentalGameDetailsAsync(id).Result;
+                    var item = NPFLauncher.GetRentalGameDetailsAsync(id).GetAwaiter().GetResult();
                     CacheManager.ClearCacheImage(item);
                     Set(item);
                 } catch (Exception e) {
@@ -33,7 +33,7 @@ public class EntityRentalDetail {
                         return;
                     }
 
-                    Set(NPFLauncher.GetGameRentalAddressAsync(id).Result);
+                    Set(NPFLauncher.GetGameRentalAddressAsync(id).GetAwaiter().GetResult());
                 } catch (Exception e) {
                     exception = e;
                 }

@@ -51,16 +51,16 @@ public class EntityAccount : EntityUserInfo {
     public bool IsConfig()
     {
         // 主动登录游戏
-        if (!NirvanaConfig.GetBool("autoLoginGame")) {
+        if (!NirvanaConfig.GetValue<bool>("autoLoginGame")) {
             return false;
         }
 
         // 主动登录 163Email
         if ("163Email".Equals(Type, StringComparison.OrdinalIgnoreCase)) {
-            return NirvanaConfig.GetBool("autoLoginGame163Email");
+            return NirvanaConfig.GetValue<bool>("autoLoginGame163Email");
         }
 
         // 主动登录 Cookie
-        return "cookie".Equals(Type) && NirvanaConfig.GetBool("autoLoginGameCookie");
+        return "cookie".Equals(Type) && NirvanaConfig.GetValue<bool>("autoLoginGameCookie");
     }
 }

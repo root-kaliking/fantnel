@@ -21,7 +21,7 @@ public class EntityServerDetail {
                         return;
                     }
 
-                    var item = NPFLauncher.GetNetGameDetailByIdAsync(id).Result;
+                    var item = NPFLauncher.GetNetGameDetailByIdAsync(id).GetAwaiter().GetResult();
                     CacheManager.ClearCacheImage(item);
                     Set(item);
                 } catch (Exception e) {
@@ -34,7 +34,7 @@ public class EntityServerDetail {
                         return;
                     }
 
-                    Set(NPFLauncher.GetNetGameServerAddressAsync(id).Result);
+                    Set(NPFLauncher.GetNetGameServerAddressAsync(id).GetAwaiter().GetResult());
                 } catch (Exception e) {
                     exception = e;
                 }

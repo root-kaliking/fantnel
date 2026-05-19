@@ -71,12 +71,12 @@ public static class PlugInstoreMessage {
 
     public static EntityResponse<EntityPlugin>? GetPluginDetail(string id)
     {
-        return X19Extensions.Nirvana.Api<EntityResponse<EntityPlugin>>($"/api/fantnel/plugin/get/by-id?id={id}").Result;
+        return X19Extensions.Nirvana.Api<EntityResponse<EntityPlugin>>($"/api/fantnel/plugin/get/by-id?id={id}").GetAwaiter().GetResult();
     }
 
     private static EntityResponse<EntityPluginDownResponse>? GetDownloadInfoUrl(string id)
     {
-        return X19Extensions.Nirvana.Api<EntityResponse<EntityPluginDownResponse>>($"/api/fantnel/plugin/get/download?id={id}").Result;
+        return X19Extensions.Nirvana.Api<EntityResponse<EntityPluginDownResponse>>($"/api/fantnel/plugin/get/download?id={id}").GetAwaiter().GetResult();
     }
 
     private static string GetDownloadUrl(string id)
@@ -89,7 +89,7 @@ public static class PlugInstoreMessage {
      */
     public static void AutoUpdateCheck()
     {
-        if (!NirvanaConfig.GetBool("autoUpdatePlugin")) {
+        if (!NirvanaConfig.GetValue<bool>("autoUpdatePlugin")) {
             return;
         }
 

@@ -57,6 +57,7 @@ public static class NetEaseConnection {
         } catch (Exception e) {
             exception = e;
         }
+
         if (IsServerAuthenticated) {
             Log.Warning("[代理认证] 认证中: {0}", serverId);
             var data = await X19Extensions.Nirvana.Api<EntityResponseBase>($"/api/fantnel/authenticated?id={serverId}", gameProfile);
@@ -65,12 +66,15 @@ public static class NetEaseConnection {
                 Log.Error("[代理认证]: 出错！");
                 return false;
             }
+
             if (data.Code == 1) {
                 Log.Information("[代理认证] 成功!");
                 return true;
             }
+
             Log.Information("[代理认证] 失败: {0}", data.Message);
         }
+
         Log.Error("[认证]: {0}", JsonSerializer.Serialize(gameProfile));
         Log.Error("[认证] 认证失败: {0}", exception.Message);
         throw exception;

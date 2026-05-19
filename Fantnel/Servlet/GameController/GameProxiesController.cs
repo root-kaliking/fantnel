@@ -16,7 +16,7 @@ public class GameProxiesController : ControllerBase {
     [HttpGet("/api/gameserver/launch")]
     public IActionResult LaunchGame([FromQuery] string id, [FromQuery] string name, [FromQuery] string mode = "net")
     {
-        var proxy = ProxiesMessage.StartProxyAsync(id, name, mode).Result;
+        var proxy = ProxiesMessage.StartProxyAsync(id, name, mode).GetAwaiter().GetResult();
         return Ok(Code.ToJson(ErrorCode.Success, proxy));
     }
 
@@ -38,12 +38,11 @@ public class GameProxiesController : ControllerBase {
         ActiveGameAndProxies.CloseProxy(id);
         return Ok(Code.ToJson(ErrorCode.Success));
     }
-    
+
     [HttpPost("/api/gameproxie/authenticator")]
     public IActionResult LaunchGameProxy([FromQuery] string id, [FromBody] GameProfile gameProfile)
     {
         NetEaseConnection.CreateAuthenticator(gameProfile, id);
         return Ok(Code.ToJson(ErrorCode.Success));
     }
-    
 }

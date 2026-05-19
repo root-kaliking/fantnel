@@ -48,11 +48,13 @@ public static class PathUtil {
 
     public static string JavaExePath => GetJavaExePath(); // javaw.exe
 
+    public static readonly string ConfigPath = Path.Combine(ResourcePath, "nirvanaAccount.json");
+    
     private static string GetJavaExePath()
     {
         // Mac / Linux 没有 javaw.exe
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-            return NirvanaConfig.GetBool("useJavaW") ? "javaw.exe" : "java.exe";
+            return NirvanaConfig.GetValue<bool>("useJavaW") ? "javaw.exe" : "java.exe";
         }
 
         return "java";

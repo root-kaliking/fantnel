@@ -27,6 +27,7 @@ public static class SimplePack {
                     foreach (var item in uints) {
                         list.AddRange(BitConverter.GetBytes(item));
                     }
+
                     array2 = list.ToArray();
                     break;
                 }
@@ -38,6 +39,7 @@ public static class SimplePack {
                     foreach (var item2 in ulongs) {
                         list2.AddRange(BitConverter.GetBytes(item2));
                     }
+
                     array2 = list2.ToArray();
                     break;
                 }
@@ -49,6 +51,7 @@ public static class SimplePack {
                     foreach (var item3 in longs) {
                         list3.AddRange(BitConverter.GetBytes(item3));
                     }
+
                     array2 = list3.ToArray();
                     break;
                 }
@@ -87,10 +90,12 @@ public static class SimplePack {
                     array2 = Pack((ushort)array2.Length, array2);
                     break;
             }
+
             if (array2 != null) {
                 array = array.Concat(array2).ToArray();
             }
         }
+
         return array;
     }
 }

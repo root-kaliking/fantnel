@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using DotNetty.Buffers;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;

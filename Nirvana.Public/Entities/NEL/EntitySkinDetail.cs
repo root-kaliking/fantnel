@@ -10,7 +10,7 @@ namespace Nirvana.Public.Entities.NEL;
 public class EntitySkinDetail {
     public EntitySkinDetail(string id)
     {
-        Set(NPFLauncher.GetSkinDetailsAsync(id).Result);
+        Set(NPFLauncher.GetSkinDetailsAsync(id).GetAwaiter().GetResult());
     }
 
     [JsonPropertyName("entity_id")]

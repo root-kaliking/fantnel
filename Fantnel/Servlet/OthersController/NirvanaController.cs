@@ -37,20 +37,20 @@ public class NirvanaController : ControllerBase {
     [HttpGet("/api/nirvana/add")]
     public IActionResult AddConfig(string name, string? value, string? property)
     {
-        NirvanaConfig.AddValue(name, value, property);
+        NirvanaConfig.AddByTypeName(name, value, property);
         return Ok(Code.ToJson(ErrorCode.Success));
     }
 
     // 设置配置
     [HttpGet("/api/nirvana/set")]
-    public IActionResult SetConfig(string mode, string? value, string? property)
+    public IActionResult SetConfig(string mode, string? value)
     {
         if ("gameMemory".Equals(mode, StringComparison.OrdinalIgnoreCase)) {
             NirvanaConfig.SetGameMemory(value);
         } else if ("chatEnable".Equals(mode, StringComparison.OrdinalIgnoreCase)) {
             NirvanaAccountManager.SetChatEnable(value);
         } else {
-            NirvanaConfig.SetValue(mode, value, property);
+            NirvanaConfig.SetValue(mode, value);
         }
 
         return Ok(Code.ToJson(ErrorCode.Success));

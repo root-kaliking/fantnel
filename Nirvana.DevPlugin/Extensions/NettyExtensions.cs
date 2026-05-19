@@ -10,7 +10,6 @@ using Nirvana.DevPlugin.Utils;
 namespace Nirvana.DevPlugin.Extensions;
 
 public static class NettyExtensions {
-    
     public static int ReadVarInt(this byte[] buffer)
     {
         var num = 0;
@@ -28,6 +27,38 @@ public static class NettyExtensions {
         }
 
         throw new IndexOutOfRangeException();
+    }
+
+    public static List<string> ReadToRegistry(this byte[] bytes)
+    {
+        var context = Encoding.UTF8.GetString(bytes);
+        return context.ReadToRegistry();
+    }
+
+    public static List<string> ReadToRegistry(this string context)
+    {
+        return context.Split('\0').ToList();
+    }
+
+
+    public static int GetVarIntSize(this int input)
+    {
+        for (var i = 1; i < 5; i++) {
+            if ((input & (-1 << (i * 7))) == 0) {
+                return i;
+            }
+        }
+
+        return 5;
+    }
+
+    public static T GetOrDefault<T>(this IAttribute<T> attribute, Func<T> value)
+    {
+        if (attribute.Get() == null) {
+            attribute.SetIfAbsent(value());
+        }
+
+        return attribute.Get();
     }
 
     extension(IByteBuffer buffer) {
@@ -143,17 +174,6 @@ public static class NettyExtensions {
         }
     }
 
-    public static List<string> ReadToRegistry(this byte[] bytes)
-    {
-        var context = Encoding.UTF8.GetString(bytes);
-        return context.ReadToRegistry();
-    }
-    
-    public static List<string> ReadToRegistry(this string context)
-    {
-        return context.Split('\0').ToList();
-    }
-
     extension(IByteBuffer buffer) {
         public List<string> ReadToRegistry()
         {
@@ -244,18 +264,6 @@ public static class NettyExtensions {
         }
     }
 
-
-    public static int GetVarIntSize(this int input)
-    {
-        for (var i = 1; i < 5; i++) {
-            if ((input & (-1 << (i * 7))) == 0) {
-                return i;
-            }
-        }
-
-        return 5;
-    }
-
     extension(IByteBuffer buffer) {
         public T WithReaderScope<T>(Func<IByteBuffer, T> action)
         {
@@ -272,14 +280,5 @@ public static class NettyExtensions {
             buffer.WriteByte((byte)value);
             return buffer;
         }
-    }
-
-    public static T GetOrDefault<T>(this IAttribute<T> attribute, Func<T> value)
-    {
-        if (attribute.Get() == null) {
-            attribute.SetIfAbsent(value());
-        }
-
-        return attribute.Get();
     }
 }

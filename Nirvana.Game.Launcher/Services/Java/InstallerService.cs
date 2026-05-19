@@ -1,7 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Nirvana.Game.Launcher.Utils.Progress;
@@ -180,6 +178,7 @@ public static class InstallerService {
                 if (File.Exists(jar) && FileUtil.ComputeMd5FromFile(jar).Equals(subEntity.JarMd5, StringComparison.OrdinalIgnoreCase)) {
                     continue;
                 }
+
                 var archive = Path.Combine(corePath, subEntity.ResName);
                 await DownloadUtil.DownloadAsync(subEntity.ResUrl, archive, dp => {
                     uiProgress.Report(new SyncProgressBarUtil.ProgressReport {
@@ -200,6 +199,7 @@ public static class InstallerService {
                 foreach (var t in array) {
                     FileUtil.CopyFileSafe(t, jar);
                 }
+
                 FileUtil.DeleteDirectorySafe(extractDir);
             }
         }
@@ -223,8 +223,10 @@ public static class InstallerService {
                             modList.Mods.Add(mod);
                         }
                     }
+
                     continue;
                 }
+
                 await DownloadUtil.DownloadAsync(subEntity.ResUrl, compArchive, p => {
                     uiProgress.Report(new SyncProgressBarUtil.ProgressReport {
                         Percent = p,

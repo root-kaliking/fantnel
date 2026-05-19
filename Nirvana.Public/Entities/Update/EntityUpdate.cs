@@ -134,7 +134,7 @@ public class EntityUpdate {
 
             var thread = new Thread(() => {
                 // Log.Warning("{0}: Start...", entityUpdate.Index);
-                var success = CheckUpdateSingle(entityUpdate, filePath, safeSavePath).Result;
+                var success = CheckUpdateSingle(entityUpdate, filePath, safeSavePath).GetAwaiter().GetResult();
                 lock (Lock) {
                     if (success == 1) {
                         count++;

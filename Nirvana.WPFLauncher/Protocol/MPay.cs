@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Nirvana.WPFLauncher.Entities.MPay;
 using Nirvana.WPFLauncher.Http;
 using Nirvana.WPFLauncher.Utils;
+using NirvanaAPI;
+using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.WPFLauncher.Protocol;
@@ -22,17 +24,14 @@ public class MPay : IDisposable {
 
     private readonly string _unique;
 
-    public MPay(string gameId, string gameVersion)
+    public MPay(string gameId = "aecfrxodyqaaaajp-g-x19")
     {
         GameId = gameId;
-        GameVersion = gameVersion;
-        _unique = CreateOrLoadUnique(gameId).Result;
-        _device = CreateOrLoadDeviceAsync(gameId).Result;
+        _unique = CreateOrLoadUnique();
+        _device = CreateOrLoadDevice(gameId);
     }
 
     private string GameId { get; }
-
-    private string GameVersion { get; }
 
     public void Dispose()
     {
@@ -46,43 +45,42 @@ public class MPay : IDisposable {
         return _device;
     }
 
-    private static async Task<string> CreateOrLoadUnique(string gameId)
+    private static string CreateOrLoadUnique()
     {
-        var text = gameId + "-guid.cds";
-        var content = await File.ReadAllTextAsync(text);
-        return string.IsNullOrEmpty(content) ? CreateUnique(text) : content;
+        return NirvanaConfig.GetValue("netease_unique", CreateUnique);
     }
 
-    private static string CreateUnique(string fileName)
+    private static string CreateUnique()
     {
-        var text = Guid.NewGuid().ToString().Replace("-", "");
-        File.WriteAllText(fileName, text);
-        return text;
+        return Guid.NewGuid().ToString().Replace("-", "");
     }
 
-    private async Task<EntityDevice> CreateOrLoadDeviceAsync(string gameId)
+    private EntityDevice CreateOrLoadDevice(string gameId)
     {
-        var text = gameId + "-device.cds";
-        var content = await File.ReadAllTextAsync(text);
-        if (string.IsNullOrEmpty(content)) {
-            return await CreateDeviceAsync(gameId, text);
-        }
-
-        return JsonSerializer.Deserialize<EntityDeviceResponse>(content)?.EntityDevice ?? throw new Exception("Failed to load device");
+        return NirvanaConfig.GetValue("netease_device", () => CreateDevice(gameId));
     }
 
-    private async Task<EntityDevice> CreateDeviceAsync(string gameId, string fileName)
+    private EntityDevice CreateDevice(string gameId)
+    {
+        return CreateDeviceAsync(gameId).GetAwaiter().GetResult();
+    }
+
+    private async Task<EntityDevice> CreateDeviceAsync(string gameId)
     {
         var buildDeviceParams = BuildDeviceParams();
         buildDeviceParams.Add("unique_id", _unique);
         var obj = await _service.PostAsync("/mpay/games/" + gameId + "/devices", buildDeviceParams.BuildQueryString(), "application/x-www-form-urlencoded");
         obj.EnsureSuccessStatusCode();
         var text = await obj.Content.ReadAsStringAsync();
-        await File.WriteAllTextAsync(fileName, text);
         return JsonSerializer.Deserialize<EntityDeviceResponse>(text)?.EntityDevice ?? throw new Exception("Failed to create device");
     }
 
-    public async Task<EntityMPayUserResponse> LoginWithEmailAsync(string email, string password)
+    public EntityMPayUserResponse LoginWithEmail(string email, string password)
+    {
+        return LoginWithEmailAsync(email, password).GetAwaiter().GetResult();
+    }
+
+    private async Task<EntityMPayUserResponse> LoginWithEmailAsync(string email, string password)
     {
         var value = JsonSerializer.Serialize(new EntityUsersParameters {
             Password = password.EncodeMd5(),
@@ -97,11 +95,16 @@ public class MPay : IDisposable {
         var text = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode) {
             var entityVerifyResponse = JsonSerializer.Deserialize<EntityVerifyResponse>(text);
-            if (entityVerifyResponse is { Code: 1351 }) {
-                throw new Exception(text);
+            if (entityVerifyResponse is null) {
+                throw new Exception("Failed to login with email, response: " + text);
             }
-
-            throw new Exception("Failed to login with email, response: " + text);
+            throw new ErrorCodeException(entityVerifyResponse) {
+                Entity = {
+                    Code = entityVerifyResponse.Code,
+                    Data = entityVerifyResponse,
+                    Message = entityVerifyResponse.Reason
+                }
+            };
         }
 
         return JsonSerializer.Deserialize<EntityMPayUserResponse>(text) ?? throw new Exception("Failed to login with email, response: " + text);
@@ -169,7 +172,7 @@ public class MPay : IDisposable {
         queryBuilder.Add("sv", "10.0.22621");
         queryBuilder.Add("updater_cv", "c1.0.0");
         queryBuilder.Add("game_id", GameId);
-        queryBuilder.Add("gv", GameVersion);
+        queryBuilder.Add("gv", X19.GameVersion);
         return queryBuilder;
     }
 

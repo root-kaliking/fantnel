@@ -12,13 +12,13 @@ public class C2SConfigPluginMessage : BPacket {
 
     private string? _identifier;
     private byte[]? _payload;
-    
+
     public override void ReadFromBuffer(BGameConnection connection, IByteBuffer buffer)
     {
         _identifier = buffer.ReadStringFromBuffer(32);
         _payload = buffer.ReadBytes();
     }
-    
+
     public override void WriteToBuffer(IByteBuffer buffer)
     {
         ArgumentNullException.ThrowIfNull(_identifier);

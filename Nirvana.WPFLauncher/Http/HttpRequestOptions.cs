@@ -31,12 +31,14 @@ public class HttpRequestOptions {
         var httpRequestOptions = new HttpRequestOptions {
             HttpVersion = HttpVersion
         };
-        foreach (var header in Headers){
+        foreach (var header in Headers) {
             httpRequestOptions.Headers[header.Key] = header.Value;
         }
+
         foreach (var queryParameter in QueryParameters) {
             httpRequestOptions.QueryParameters[queryParameter.Key] = queryParameter.Value;
         }
+
         return httpRequestOptions;
     }
 }

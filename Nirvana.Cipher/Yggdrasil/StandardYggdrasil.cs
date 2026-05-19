@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Nirvana.Cipher.Cipher;
-using Nirvana.Cipher.Entities;
 using Nirvana.Cipher.Entities.Yggdrasil;
 using Nirvana.Cipher.Extensions;
 using Nirvana.Cipher.Generator;

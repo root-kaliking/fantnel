@@ -44,7 +44,7 @@ public static class AccountMessage {
         lock (GameSaveAccountLock) {
             var captchaId = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
             captchaId = captchaId[..8];
-            Captcha4399Bytes = X19Extensions.Pt4399.ApiRawB("/ptlogin/captcha.do?captchaId=" + captchaId).Result;
+            Captcha4399Bytes = X19Extensions.Pt4399.ApiRawB("/ptlogin/captcha.do?captchaId=" + captchaId).GetAwaiter().GetResult();
             _session4399Id = captchaId;
         }
     }
@@ -169,7 +169,7 @@ public static class AccountMessage {
 
             switch (account.Type) {
                 case "cookie":
-                    result = NPFLauncher.LoginWithCookieAsync(account.Password).Result;
+                    result = NPFLauncher.LoginWithCookie(account.Password);
                     break;
                 case "4399" or "4399com" or "163Email" when account.Account == null:
                     throw new ErrorCodeException(ErrorCode.AccountError);
@@ -177,21 +177,21 @@ public static class AccountMessage {
                     throw new ErrorCodeException(ErrorCode.CaptchaNot);
                 case "4399": {
                     var cookie = N4399.LoginWithPasswordAsync(account.Account, account.Password, _session4399Id, Captcha4399);
-                    result = NPFLauncher.LoginWithCookieAsync(cookie.Result).Result;
+                    result = NPFLauncher.LoginWithCookie(cookie.GetAwaiter().GetResult());
                     UpdateCaptcha();
                     break;
                 }
                 case "4399com": {
-                    var cookie = NCom4399.LoginWithPasswordAsync(account.Account, account.Password, Captcha4399, _session4399Id);
-                    result = NPFLauncher.LoginWithCookieAsync(cookie.Result).Result;
+                    var cookie = NCom4399.LoginWithPassword(account.Account, account.Password, Captcha4399, _session4399Id);
+                    result = NPFLauncher.LoginWithCookie(cookie);
                     UpdateCaptcha();
                     break;
                 }
                 case "163Email": {
-                    var mpay = new MPay("aecfrxodyqaaaajp-g-x19", X19.GameVersion);
-                    var mPayUser = mpay.LoginWithEmailAsync(account.Account, account.Password).Result;
+                    var mpay = new MPay();
+                    var mPayUser = mpay.LoginWithEmail(account.Account, account.Password);
                     var cookie = GenerateCookie(mPayUser, mpay.GetDevice());
-                    result = NPFLauncher.LoginWithCookieAsync(cookie).Result;
+                    result = NPFLauncher.LoginWithCookie(cookie);
                     break;
                 }
             }
@@ -229,7 +229,9 @@ public static class AccountMessage {
             // 获取账号列表
             var (accountList, accountPath) = GetAccountList1(defaultLogin);
 
-            if (account.Id == null) throw new ErrorCodeException(ErrorCode.IdError);
+            if (account.Id == null) {
+                throw new ErrorCodeException(ErrorCode.IdError);
+            }
 
             // 修改账号
             accountList[account.Id.Value] = account;
@@ -350,7 +352,7 @@ public static class AccountMessage {
         Exception? exception = null;
 
         try {
-            var freeSkinCount = NPFLauncher.GetFreeSkinListAsync(0, 1).Result.Length;
+            var freeSkinCount = NPFLauncher.GetFreeSkinListAsync(0, 1).GetAwaiter().GetResult().Length;
             if (freeSkinCount > 0) {
                 // 登录成功
                 InfoManager.AddAccount(account);

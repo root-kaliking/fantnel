@@ -156,11 +156,21 @@ public static class NPFLauncher {
     }
 
     /**
+    * 使用Cookie登录
+    * @param cookie Cookie请求
+    * @return 登录成功后的用户信息
+     */
+    public static EntityAuthenticationOtp LoginWithCookie(string cookie)
+    {
+        return LoginWithCookieAsync(cookie).GetAwaiter().GetResult();
+    }
+
+    /**
      * 使用Cookie登录
      * @param cookie Cookie请求
      * @return 登录成功后的用户信息
      */
-    public static async Task<EntityAuthenticationOtp> LoginWithCookieAsync(string cookie)
+    private static async Task<EntityAuthenticationOtp> LoginWithCookieAsync(string cookie)
     {
         EntityX19CookieRequest? req;
         try {

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Nirvana.Cipher.Cipher.Nirvana.Connection;
-using Nirvana.Cipher.Entities.Yggdrasil;
-using Nirvana.Cipher.Yggdrasil;
 using Nirvana.Development;
 using Nirvana.DevPlugin.Entities;
 using Nirvana.Heypixel;
@@ -15,13 +11,11 @@ using Nirvana.WPFLauncher.Entities.WPFLauncher.RentalGame;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.RentalGame.GameCharacters;
 using NirvanaAPI.Entities.Login;
 using NirvanaAPI.Manager;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.Public.Manager;
 
 public class InterceptorManager {
-    
     private readonly EntityAccount _availableUser;
 
     private readonly string _entityId;
@@ -33,7 +27,7 @@ public class InterceptorManager {
     {
         HeypixelProtocol.Init();
     }
-    
+
     public InterceptorManager(EntityQueryNetGameDetailItem server, EntityGameCharacter character, EntityMcVersion version, EntityNetGameServerAddress address, string mods, int port)
     {
         _mods = mods;
@@ -65,6 +59,5 @@ public class InterceptorManager {
                 }
             }
         });
-
     }
 }

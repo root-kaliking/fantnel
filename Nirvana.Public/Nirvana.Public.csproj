@@ -16,7 +16,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Nirvana.Cipher\Nirvana.Cipher.csproj"/>
         <ProjectReference Include="..\Nirvana.Game.Launcher\Nirvana.Game.Launcher.csproj"/>
-        <ProjectReference Include="..\Nirvana.Heypixel\Nirvana.Heypixel.csproj" />
+        <ProjectReference Include="..\Nirvana.Heypixel\Nirvana.Heypixel.csproj"/>
         <!--        <ProjectReference Include="..\Nirvana.Chat\Nirvana.Chat.csproj"/>-->
     </ItemGroup>
 

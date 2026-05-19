@@ -45,7 +45,7 @@ public class HomeController : ControllerBase {
         }
 
         // 检查主题是否存在
-        if (InitProgram.SafeTheme(entity.Value).Result) {
+        if (InitProgram.SafeTheme(entity.Value).GetAwaiter().GetResult()) {
             ConfigUtil.SaveConfig("themeValue", entity.Value);
         }
 
