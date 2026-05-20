@@ -39,8 +39,6 @@ public static class InstallerService {
         var libZip = Path.Combine(PathUtil.CachePath, versionName + "_Lib.7z");
 
         await ProcessPackage(versionResult.CoreLibUrl, libZip, PathUtil.CachePath, libMd5File, versionResult.CoreLibMd5, versionName + " libraries");
-
-        InstallCoreLibs(Path.Combine(PathUtil.CachePath, versionName + "_libs"), gameVersion);
     }
 
     private static async Task ProcessPackage(string url, string zipPath, string extractTo, string md5Path, string md5, string label)
@@ -49,103 +47,14 @@ public static class InstallerService {
         if (File.Exists(md5Path) && await File.ReadAllTextAsync(md5Path) == md5) {
             return;
         }
-
         var progress = new SyncProgressBarUtil.ProgressBar();
         var uiProgress = new SyncCallback<SyncProgressBarUtil.ProgressReport>(progress.Update);
         await DownloadUtil.DownloadAsync(url, zipPath, label, uiProgress);
         await CompressionUtil.ExtractAsync(zipPath, extractTo, label, uiProgress);
         await File.WriteAllTextAsync(md5Path, md5);
-        FileUtil.DeleteFileSafe(zipPath);
-    }
-
-    private static void InstallCoreLibs(string libPath, EnumGameVersion gameVersion)
-    {
-        var gameVersionFromEnum = GameVersionUtil.GetGameVersionFromEnum(gameVersion);
-        var text = "forge-" + gameVersionFromEnum + "-";
-        var text2 = "launchwrapper-";
-        var text3 = "MercuriusUpdater-";
-        var text4 = gameVersionFromEnum + ".jar";
-        var text5 = gameVersionFromEnum + ".json";
-        if (!Directory.Exists(libPath)) {
-            return;
+        if (Tools.IsReleaseVersion()) {
+            FileUtil.DeleteFileSafe(zipPath);
         }
-
-        var files = Directory.GetFiles(libPath, "*", SearchOption.AllDirectories);
-        foreach (var text6 in files) {
-            var fileName = Path.GetFileName(text6);
-            if (fileName.StartsWith(text)) {
-                text = Path.GetFileNameWithoutExtension(text6);
-                var path = text.Replace("forge-", "");
-                var text7 = Path.Combine(PathUtil.GameBasePath, ".minecraft", "libraries", "net", "minecraftforge", "forge", path);
-                var text8 = Path.Combine(text7, text + ".jar");
-                if (!Directory.Exists(text7)) {
-                    Directory.CreateDirectory(text7);
-                } else if (File.Exists(text8)) {
-                    File.Delete(text8);
-                }
-
-                File.Copy(text6, text8, true);
-            } else if (fileName.StartsWith(text2)) {
-                text2 = Path.GetFileNameWithoutExtension(text6);
-                var path2 = text2.Replace("launchwrapper-", "");
-                var text9 = Path.Combine(PathUtil.GameBasePath, ".minecraft", "libraries", "net", "minecraft", "launchwrapper", path2);
-                var text10 = Path.Combine(text9, text2 + ".jar");
-                if (!Directory.Exists(text9)) {
-                    Directory.CreateDirectory(text9);
-                } else if (File.Exists(text10)) {
-                    File.Delete(text10);
-                }
-
-                File.Copy(text6, text10, true);
-            } else if (fileName.StartsWith(text3)) {
-                text3 = Path.GetFileNameWithoutExtension(text6);
-                var path3 = text3.Replace("MercuriusUpdater-", "");
-                var text11 = Path.Combine(PathUtil.GameBasePath, ".minecraft", "libraries", "net", "minecraftforge", "MercuriusUpdater", path3);
-                var text12 = Path.Combine(text11, text3 + ".jar");
-                if (!Directory.Exists(text11)) {
-                    Directory.CreateDirectory(text11);
-                } else if (File.Exists(text12)) {
-                    File.Delete(text12);
-                }
-
-                File.Copy(text6, text12, true);
-            } else if (fileName.Equals(text4)) {
-                var destFileName = Path.Combine(PathUtil.GameBasePath, ".minecraft", "versions", gameVersionFromEnum, text4);
-                File.Copy(text6, destFileName, true);
-            } else if (fileName.Equals(text5)) {
-                var destFileName2 = Path.Combine(PathUtil.GameBasePath, ".minecraft", "versions", gameVersionFromEnum, text5);
-                File.Copy(text6, destFileName2, true);
-            } else if (fileName.StartsWith("modlauncher-") && fileName.Contains("9.1.0")) {
-                var destFileName3 = Path.Combine(new[] {
-                    PathUtil.GameBasePath,
-                    ".minecraft",
-                    "libraries", "cpw", "mods", "modlauncher", "9.1.0", "modlauncher-9.1.0.jar"
-                });
-                File.Copy(text6, destFileName3, true);
-            } else if (fileName.StartsWith("modlauncher-") && fileName.Contains("10.0.9")) {
-                var destFileName4 = Path.Combine(new[] {
-                    PathUtil.GameBasePath,
-                    ".minecraft",
-                    "libraries", "cpw", "mods", "modlauncher", "10.0.9", "modlauncher-10.0.9.jar"
-                });
-                // 创建目录
-                var directory = Path.GetDirectoryName(destFileName4);
-                if (!Directory.Exists(directory) && directory != null) {
-                    Directory.CreateDirectory(directory);
-                }
-
-                File.Copy(text6, destFileName4, true);
-            } else if (fileName.StartsWith("modlauncher-") && fileName.Contains("10.2.1")) {
-                var destFileName5 = Path.Combine(new[] {
-                    PathUtil.GameBasePath,
-                    ".minecraft",
-                    "libraries", "net", "minecraftforge", "modlauncher", "10.2.1", "modlauncher-10.2.1.jar"
-                });
-                File.Copy(text6, destFileName5, true);
-            }
-        }
-
-        FileUtil.DeleteDirectorySafe(libPath);
     }
 
     public static async Task<EntityModsList?> InstallGameMods(EnumGameVersion gameVersion, string gameId, bool isRental = false)
@@ -230,7 +139,7 @@ public static class InstallerService {
                 await DownloadUtil.DownloadAsync(subEntity.ResUrl, compArchive, p => {
                     uiProgress.Report(new SyncProgressBarUtil.ProgressReport {
                         Percent = p,
-                        Message = "Downloading game assets"
+                        Message = "Downloading Game Assets"
                     });
                 });
                 FileUtil.DeleteDirectorySafe(compDir);

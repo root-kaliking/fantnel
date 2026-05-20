@@ -432,7 +432,9 @@ public static class NPFLauncher {
     public static async Task<EntityCoreLibResponse> GetMinecraftClientLibsAsync(EnumGameVersion? gameVersion = null)
     {
         uint gameVersionId = 0;
-        if (gameVersion != null) gameVersionId = (uint)gameVersion.Value;
+        if (gameVersion != null) {
+            gameVersionId = (uint)gameVersion.Value;
+        }
         var entity = await X19Extensions.Client.Api<EntityWPFLauncher<EntityCoreLibResponse>>("/game-patch-info", new EntityMcDownloadVersion {
             McVersion = gameVersionId
         });

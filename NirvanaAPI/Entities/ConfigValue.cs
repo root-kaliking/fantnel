@@ -116,7 +116,7 @@ public class ConfigValue<T> : IConfigValue {
             float floatValue => floatValue,
             bool boolValue => boolValue,
             int intValue => intValue,
-            JsonNode json => json.AsObject(),
+            JsonNode json => json.AsObject().DeepClone(),
             _ => null
         };
         jsonObj.Add(Name, jsonNode);

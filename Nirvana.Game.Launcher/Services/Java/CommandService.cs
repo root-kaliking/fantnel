@@ -49,6 +49,8 @@ public class CommandService {
     private string _version = "";
 
     private string _workPath = "";
+    
+    private string _nativesPath = "";
 
     public void Init(EnumGameVersion gameVersion, EntityLaunchGame entity, string workPath, string uuid, int socketPort, string protocolVersion = "", int rpcPort = 11413)
     {
@@ -105,50 +107,25 @@ public class CommandService {
         }
 
         // 删除 linux/mac 下的 natives[win库]
-        var nativesPath = Path.Combine(PathUtil.GameBasePath, ".minecraft", "versions", _version, "natives");
-        if (Directory.Exists(nativesPath)) {
-            Directory.Delete(nativesPath, true);
-        }
-
-        // 删除 缓存目录
-        var fantNativesPath = Path.Combine(PathUtil.GameBasePath, ".minecraft", "versions", _version, "fant-natives");
-        if (Directory.Exists(fantNativesPath)) {
-            Directory.Delete(fantNativesPath, true);
+        if (Directory.Exists(_nativesPath)) {
+            Directory.Delete(_nativesPath, true);
         }
 
         // 解压 natives 库
         foreach (var item in _minecraft.Where(item => item.IsNative())) {
             Log.Warning("Fix Native Extract {0}", item.GetPath1());
             if (item.DownloadAuto()) {
-                await CompressionUtil.ExtractAsync(item.GetPath(), fantNativesPath);
+                await CompressionUtil.ExtractAsync(item.GetPath(), _nativesPath);
             }
         }
-
-        Directory.CreateDirectory(nativesPath);
-
-        var pattern = "*.dll";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
-            pattern = "*.so";
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
-            pattern = "*.dylib";
-        }
-
-        var files = Directory.GetFiles(fantNativesPath, pattern, SearchOption.AllDirectories);
-
-        foreach (var file in files) {
-            File.Copy(file, Path.Combine(nativesPath, Path.GetFileName(file)));
-        }
-
-        Directory.Delete(fantNativesPath, true);
+        
     }
 
     private void InstallNativeDll()
     {
         try {
             var path = Path.Combine(PathUtil.ResourcePath, "api-ms-win-crt-utility-l1-1-1.dll");
-            var runtimePath = Path.Combine(PathUtil.GameBasePath, ".minecraft", "versions", _version, "natives", "runtime");
+            var runtimePath = Path.Combine(_nativesPath, "runtime");
             FileUtil.CopyFileSafe(path, Path.Combine(runtimePath, "api-ms-win-crt-utility-l1-1-1.dll"));
         } catch (Exception ex) {
             Log.Error("Failed to install native dll: {0}", ex);
@@ -389,8 +366,11 @@ public class CommandService {
 
         var classPaths = BuildJarLists(cfg, _version);
 
+        var nativesPath = Path.Combine("versions", _version, "natives");
+        
         if (!string.IsNullOrEmpty(jvmArguments)) {
             // 修复 linux/mac 冲突
+            nativesPath = GameArgumentsUtil.GetArguments("java.library.path", jvmArguments, false, CommandMode.Mode5, CommandMode.Mode6);
             jvmArguments = GameArgumentsUtil.DeleteArguments("java.library.path", jvmArguments, CommandMode.Mode5, CommandMode.Mode6);
             // 修复 模块路径 错误
             jvmArguments = ReplaceLib("p", jvmArguments);
@@ -444,7 +424,7 @@ public class CommandService {
         }
 
         // 添加 验证信息
-        var stringBuilder = new StringBuilder().Append(" -Xmx").Append(NirvanaConfig.GetValue<string>("gameMemory")).Append("M ").Append(NirvanaConfig.GetValue<string>("jvmArgs")).Append($" -DlauncherControlPort={socketPort}").Append($" -DlauncherGameId={_launcherGame.GameId}").Append($" -DuserId={_launcherGame.Account.GetUserId()}").Append($" -DToken={TokenUtil.GenerateEncryptToken(_launcherGame.Account.GetToken())}").Append(" -DServer=RELEASE").Append(AddNativePath());
+        var stringBuilder = new StringBuilder().Append(" -Xmx").Append(NirvanaConfig.GetValue<int>("gameMemory")).Append("M ").Append(NirvanaConfig.GetValue<string>("jvmArgs")).Append($" -DlauncherControlPort={socketPort}").Append($" -DlauncherGameId={_launcherGame.GameId}").Append($" -DuserId={_launcherGame.Account.GetUserId()}").Append($" -DToken={TokenUtil.GenerateEncryptToken(_launcherGame.Account.GetToken())}").Append(" -DServer=RELEASE").Append(AddNativePath(nativesPath));
 
         jvmArguments = GameArgumentsUtil.AddArguments(stringBuilder.ToString(), jvmArguments); // 添加 修复参数
 
@@ -562,10 +542,11 @@ public class CommandService {
         return stringBuilder.ToString();
     }
 
-    private string AddNativePath()
+    private string AddNativePath(string nativesPath)
     {
-        var natives = Path.Combine(PathUtil.GameBasePath, ".minecraft", "versions", _version, "natives");
-
+        var natives = Path.Combine(PathUtil.GameBasePath, ".minecraft", nativesPath);
+        _nativesPath = natives;
+        
         // 避免 linux 出现权限问题
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
             var linkPath = "/tmp/fantnel-natives-" + _version;

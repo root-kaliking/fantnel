@@ -141,7 +141,7 @@ public class NirvanaConfig {
         if (context is JsonNode jsonObject) {
             return jsonObject.Deserialize<T>() ?? throw new InvalidOperationException();
         }
-        return (T)context;
+        return (T)Convert.ChangeType(context, typeof(T));
     }
 
     public static void SetValue(string name, object? value, bool save = true)

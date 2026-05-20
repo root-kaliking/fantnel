@@ -79,7 +79,9 @@ public static class InstallerService {
             Percent = 0,
             Message = "Checking package validation"
         });
-        if (!await ValidatePackageAsync(archivePath, "50ac5016023c295222b979565b9c707b")) return false;
+        if (!await ValidatePackageAsync(archivePath, "50ac5016023c295222b979565b9c707b")) {
+            return false;
+        }
         progress.Report(new SyncProgressBarUtil.ProgressReport {
             Percent = 100,
             Message = "Package validation succeeded"

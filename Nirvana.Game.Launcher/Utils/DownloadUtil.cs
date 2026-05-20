@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Downloader;
 using Nirvana.Game.Launcher.Utils.Progress;
@@ -8,48 +7,50 @@ using Serilog;
 namespace Nirvana.Game.Launcher.Utils;
 
 public static class DownloadUtil {
-    public static async Task<bool> DownloadAsync(string url, string destinationPath, Action<double>? downloadProgress = null, int maxConcurrentSegments = 4)
+    public static async Task<bool> DownloadAsync(string url, string destinationPath, Action<double>? downloadProgress = null)
     {
         try {
+            if (url.Contains("netease.com")) {
+                Log.Information("Downloading \"{0}\" from {1}", destinationPath, url);
+            }
+            
+            var tcs = new TaskCompletionSource<bool>();
+
             var downloadOpt = new DownloadConfiguration {
-                ChunkCount = maxConcurrentSegments, // 设置并发块数
-                MaxTryAgainOnFailure = 3, // 下载失败后重试次数
-                ParallelDownload = true, // 启用并行下载
-                EnableAutoResumeDownload = true // 启用自动续传功能
+                // ChunkCount = 1, // 设置并发块数
+                MaxTryAgainOnFailure = 4, // 下载失败后重试次数
+                // ParallelDownload = true, // 启用并行下载 [ChunkCount]
+                EnableAutoResumeDownload = true, // 启用自动续传功能
+                HttpClientTimeout = 300_000, // 5 分钟
             };
 
             await using var downloader = new DownloadService(downloadOpt);
-
-            var lastReportTime = DateTime.MinValue;
-            var throttlePeriod = TimeSpan.FromMilliseconds(200); // 设置更新间隔为100毫秒
+            
+            var lastPercentage = -1.0;
 
             // 注册进度更新事件
             downloader.DownloadProgressChanged += (_, e) => {
-                var now = DateTime.UtcNow;
-                // 检查距离上次报告是否已超过设定的时间间隔
-                if (now - lastReportTime >= throttlePeriod) {
-                    lastReportTime = now;
-                    downloadProgress?.Invoke(e.ProgressPercentage);
+                if (Math.Abs(e.ProgressPercentage - lastPercentage) < 0.1) {
+                    return;
+                }
+                lastPercentage = e.ProgressPercentage;
+                downloadProgress?.Invoke(e.ProgressPercentage);
+            };
+            
+            downloader.DownloadFileCompleted += (_, e) => { 
+                if (e.Error != null) {
+                    Log.Error("Download failed for {0}\n{1}", url, e.Error);
+                    tcs.TrySetException(e.Error);
+                } else if (e.Cancelled) {
+                    Log.Information("Download canceled: {0}", url);
+                    tcs.TrySetCanceled();
+                } else {
+                    tcs.TrySetResult(true);
                 }
             };
 
-            downloader.DownloadFileCompleted += (_, _) => { downloadProgress?.Invoke(100); };
-
-            // 分离目标路径为目标文件夹和文件名
-            var fileInfo = new FileInfo(destinationPath);
-            var directory = fileInfo.DirectoryName;
-
-            // 确保目标目录存在
-            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory)) {
-                Directory.CreateDirectory(directory);
-            }
-
-            var package = new DownloadPackage {
-                FileName = destinationPath
-            };
-
-            await downloader.DownloadFileTaskAsync(package, url);
-            return true;
+            await downloader.DownloadFileTaskAsync(url, destinationPath);
+            return await tcs.Task;
         } catch (TaskCanceledException) {
             Log.Information("Download canceled: {0}", url);
             throw;

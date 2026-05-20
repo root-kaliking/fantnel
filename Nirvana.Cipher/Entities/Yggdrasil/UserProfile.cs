@@ -13,16 +13,11 @@ public class UserProfile {
     ];
 
     [JsonPropertyName("user")]
-    public required EntityUserInfo User { get; set; }
+    public required EntityUserInfo User { get; init; }
 
     public int GetUserId()
     {
         return int.Parse(User.GetUserId());
-    }
-
-    private string GetToken()
-    {
-        return User.GetToken();
     }
 
     public int GetAuthId()
@@ -32,6 +27,6 @@ public class UserProfile {
 
     public byte[] GetAuthToken()
     {
-        return Encoding.ASCII.GetBytes(GetToken()).Xor(TokenKey);
+        return Encoding.ASCII.GetBytes(User.GetToken()).Xor(TokenKey);
     }
 }

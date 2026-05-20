@@ -160,7 +160,9 @@ public sealed class LauncherService : IDisposable {
         };
         try {
             _progress.Report(value);
-            if (percent == 100) SyncProgressBarUtil.ProgressBar.ClearCurrent();
+            if (percent == 100) {
+                SyncProgressBarUtil.ProgressBar.ClearCurrent();
+            }
         } catch (Exception ex) {
             Log.Warning(ex, "Error reporting progress for {0}", Entity.GameId);
         }
