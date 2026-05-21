@@ -580,11 +580,11 @@ public class CommandService {
         }
 
         var format = version == "1.7.10" ? "\"uid\":[{0}],\"gameid\":[{1}],\"launcherport\":[{2}],\\\"filterkey\\\":[\\\"{3}\\\",\\\"0\\\"],\\\"filterpath\\\":[\\\"\\\",\\\"0\\\"],\\\"timedelta\\\":[0,0],\\\"launchversion\\\":[\\\"{3}\\\",\\\"0\\\"]" : "\\\"uid\\\":[{0},0],\\\"gameid\\\":[{1},0],\\\"launcherport\\\":[{2},0],\\\"filterkey\\\":[\\\"{3}\\\",\\\"0\\\"],\\\"filterpath\\\":[\\\"\\\",\\\"0\\\"],\\\"timedelta\\\":[0,0],\\\"launchversion\\\":[\\\"{4}\\\",\\\"0\\\"]";
-        object?[] args = [
+        var args = new List<object> {
             _launcherGame.Account.GetUserId(), 0, _rpcPort, RandomUtil.GetRandomString(32, "abcdefghijklmnopqrstuvwxyz"),
             _protocolVersion
-        ];
-        var text = string.Format(format, args);
+        };
+        var text = string.Format(format, args.ToArray());
         return "\"{" + text + "}\"";
     }
 }

@@ -18,10 +18,10 @@ public static class DownloadUtil {
 
             var downloadOpt = new DownloadConfiguration {
                 // ChunkCount = 1, // 设置并发块数
-                MaxTryAgainOnFailure = 4, // 下载失败后重试次数
+                // MaxTryAgainOnFailure = 4, // 下载失败后重试次数
                 // ParallelDownload = true, // 启用并行下载 [ChunkCount]
                 EnableAutoResumeDownload = true, // 启用自动续传功能
-                HttpClientTimeout = 300_000, // 5 分钟
+                // HttpClientTimeout = 300_000, // 5 分钟超时
             };
 
             await using var downloader = new DownloadService(downloadOpt);

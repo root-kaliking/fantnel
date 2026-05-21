@@ -91,7 +91,6 @@ public class GameRpcService(int port, EntityLaunchGame launchGame, EnumGameVersi
             if (array != null) {
                 SendControlData(array);
             }
-
             Log.Information("[RPC] Sent new-version authentication to {0}:{1} | User: {2} | Role: {3} | Protocol: {4}", launchGame.ServerIp, launchGame.ServerPort, launchGame.Account.UserId, launchGame.RoleName, gameVersion);
         }
     }
@@ -129,51 +128,53 @@ public class GameRpcService(int port, EntityLaunchGame launchGame, EnumGameVersi
         Task.Run(() => ProcessPlayerSkin(entityOtherEnterWorldMsg));
     }
 
-    private async Task ProcessPlayerSkin(EntityOtherEnterWorldMsg msg)
-    {
-        var list = await NPFLauncher.GetSkinListInGameAsync(launchGame.Account.GetUserId(), launchGame.Account.GetToken(), new EntityUserGameTextureRequest {
+private async Task ProcessPlayerSkin(EntityOtherEnterWorldMsg msg)
+	{
+        var list = await NPFLauncher.GetSkinListInGameAAsync(new EntityUserGameTextureRequest {
             UserId = _skip32Cipher.ComputeUserIdFromUuid(msg.Uuid).ToString(),
             ClientType = EnumGameClientType.Java
         });
-        var filePath = string.Empty;
-        var skinMode = EnumSkinMode.Default;
-        foreach (var item in list.Where(s => s.SkinId.Length > 5)) {
-            skinMode = (EnumSkinMode)item.SkinMode;
-            var tempPath = Path.Combine(_dirSkinPath, "skin_" + item.SkinId + ".png");
-            if (File.Exists(tempPath) && FileUtil.IsFileReadable(tempPath)) {
-                filePath = tempPath;
-                break;
-            }
-
-            try {
-                var entity = await NPFLauncher.GetNetGameComponentDownloadListAsync(launchGame.Account.GetUserId(), launchGame.Account.GetToken(), item.SkinId);
-                var text = entity.SubEntities.Select(sub => sub.ResUrl).FirstOrDefault();
-                if (text != null) {
-                    Directory.CreateDirectory(_dirSkinPath);
-                    await FileUtil.WriteFileSafelyAsync(tempPath, await _httpClient.GetByteArrayAsync(text));
-                    if (File.Exists(tempPath) && FileUtil.IsFileReadable(tempPath)) {
-                        filePath = tempPath;
-                        break;
-                    }
-                }
-            } catch (Exception exception) {
-                Log.Error(exception, "[RPC] Failed to handle skin for player {Name}", msg.Name);
-                try {
-                    if (File.Exists(tempPath)) {
-                        File.Delete(tempPath);
-                    }
-                } catch {
-                    Log.Error(exception, "[RPC] Failed to delete temp file {0}", filePath);
-                }
-            }
-        }
-
-        Log.Information("[RPC] Sending skin data for {0}: {1}", msg.Name, filePath);
-        var array = SimplePack.Pack((ushort)520, msg.Name, filePath, string.Empty, skinMode);
-        if (array != null) {
-            SendControlData(array);
-        }
-    }
+		var filePath = string.Empty;
+		var skinMode = EnumSkinMode.Default;
+		if (list != null) {
+			foreach (var item in list.Where(s => s.SkinId.Length > 5)) {
+				skinMode = (EnumSkinMode)item.SkinMode;
+				var tempPath = Path.Combine(_dirSkinPath, "skin_" + item.SkinId + ".png");
+				if (File.Exists(tempPath) && FileUtil.IsFileReadable(tempPath)) {
+					filePath = tempPath;
+					break;
+				}
+				try {
+                    var entity = await NPFLauncher.GetNetGameComponentDownloadListAAsync(item.SkinId);
+					var text = entity?.SubEntities.Select(sub => sub.ResUrl).FirstOrDefault();
+					if (text != null)
+					{
+						Directory.CreateDirectory(_dirSkinPath);
+                        var bytes = await _httpClient.GetByteArrayAsync(text);
+						await FileUtil.WriteFileSafelyAsync(tempPath, bytes);
+						if (File.Exists(tempPath) && FileUtil.IsFileReadable(tempPath)) {
+							filePath = tempPath;
+							break;
+						}
+					}
+				} catch (Exception exception) {
+					Log.Error(exception, "[RPC] Failed to handle skin for player {Name}", msg.Name);
+					try {
+						if (File.Exists(tempPath)) {
+							File.Delete(tempPath);
+						}
+					} catch {
+						Log.Error(exception, "[RPC] Failed to delete temp file {Path}", filePath);
+					}
+				}
+			}
+		}
+		Log.Information("[RPC] Sending skin data for {0}: {1}", msg.Name, filePath);
+		var array = SimplePack.Pack((ushort)520, msg.Name, filePath, string.Empty, skinMode);
+		if (array != null) {
+			SendControlData(array);
+		}
+	}
 
     private static void HandleLoginGame(byte[] data)
     {
@@ -231,7 +232,6 @@ public class GameRpcService(int port, EntityLaunchGame launchGame, EnumGameVersi
             _sendCache.Add(message);
             return;
         }
-
         var buffer = BitConverter.GetBytes((ushort)message.Length).Concat(message).ToArray();
         try {
             _writer?.Write(buffer);

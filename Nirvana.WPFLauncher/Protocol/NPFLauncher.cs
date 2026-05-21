@@ -408,22 +408,30 @@ public static class NPFLauncher {
     /**
     * 获取 白端服务器 模组
     */
-    public static async Task<EntityComponentDownloadInfoResponse> GetNetGameComponentDownloadListAsync(string serverId)
-    {
-        return await GetNetGameComponentDownloadListAsync(InfoManager.GetUserId(), InfoManager.GetToken(), serverId);
-    }
-
-    /**
-    * 获取 白端服务器 模组
-    */
-    public static async Task<EntityComponentDownloadInfoResponse> GetNetGameComponentDownloadListAsync(string? userId, string? userToken, string serverId)
+    private static async Task<EntityWPFLauncher<EntityComponentDownloadInfoResponse>?> GetNetGameComponentDownloadListBAsync(string serverId)
     {
         var entity = await X19Extensions.Client.Api<EntityWPFLauncher<EntityComponentDownloadInfoResponse>>("/user-item-download-v2", new EntitySearchByItemIdQuery {
             ItemId = serverId,
             Length = 0,
             Offset = 0
-        }, userId, userToken);
-        return entity == null ? throw new ErrorCodeException(ErrorCode.DetailError) : entity.SafeEntity();
+        });
+        return entity;
+    }
+    
+    /**
+    * 获取 白端服务器 模组
+    */
+    public static async Task<EntityComponentDownloadInfoResponse?> GetNetGameComponentDownloadListAAsync(string serverId)
+    {
+        var entity = await GetNetGameComponentDownloadListBAsync(serverId);
+        return entity?.Data;
+    }
+    
+    
+    public static async Task<EntityComponentDownloadInfoResponse> GetNetGameComponentDownloadListAsync(string gameId)
+    {
+        var entity = await GetNetGameComponentDownloadListBAsync(gameId);
+        return entity == null ? throw new ErrorCodeException() : entity.SafeEntity();
     }
 
     /**
@@ -444,10 +452,10 @@ public static class NPFLauncher {
     /**
      * 获取游戏皮肤
      */
-    public static async Task<List<EntityUserGameTexture>> GetSkinListInGameAsync(string userId, string userToken, EntityUserGameTextureRequest userGame)
+    public static async Task<List<EntityUserGameTexture>?> GetSkinListInGameAAsync(EntityUserGameTextureRequest userGame)
     {
-        var entity = await X19Extensions.Gateway.Api<EntityWPFLauncher<List<EntityUserGameTexture>>>("/user-game-skin/query/search-by-type", userGame, userId, userToken);
-        return entity == null ? throw new ErrorCodeException() : entity.SafeEntity();
+        var entity = await X19Extensions.Gateway.Api<EntityWPFLauncher<List<EntityUserGameTexture>>>("/user-game-skin/query/search-by-type", userGame);
+        return entity?.Data;
     }
 
     /**
@@ -472,4 +480,5 @@ public static class NPFLauncher {
         });
         return entity == null ? throw new ErrorCodeException() : entity.SafeEntity();
     }
+
 }

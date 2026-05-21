@@ -46,12 +46,17 @@ public class QueryBuilder {
         return _parameters.GetValueOrDefault(key) ?? throw new Exception("Parameter not found");
     }
 
+    public bool Contains(string key)
+    {
+        return _parameters.ContainsKey(key);
+    }
+
     public Dictionary<string, string> GetAll()
     {
         return new Dictionary<string, string>(_parameters);
     }
 
-    public string BuildQueryString()
+    public string BuildQuery()
     {
         return _parameters.Count == 0 ? string.Empty : string.Join("&", _parameters.Where(p => !string.IsNullOrEmpty(p.Value)).Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"));
     }
@@ -76,6 +81,6 @@ public class QueryBuilder {
 
     public override string ToString()
     {
-        return BuildQueryString();
+        return BuildQuery();
     }
 }

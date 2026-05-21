@@ -43,7 +43,6 @@ public static class AccountMessage {
     {
         lock (GameSaveAccountLock) {
             var captchaId = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
-            captchaId = captchaId[..8];
             Captcha4399Bytes = X19Extensions.Pt4399.ApiRawB("/ptlogin/captcha.do?captchaId=" + captchaId).GetAwaiter().GetResult();
             _session4399Id = captchaId;
         }

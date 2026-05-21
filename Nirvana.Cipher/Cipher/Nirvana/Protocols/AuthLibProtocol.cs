@@ -60,7 +60,7 @@ public class AuthLibProtocol(IPAddress address, int port, string modList, string
 
     private async Task AcceptLoopAsync(CancellationToken token)
     {
-        while (!token.IsCancellationRequested && !_disposed)
+        while (!token.IsCancellationRequested && !_disposed) {
             try {
                 if (_listener != null) {
                     await HandleClientAsync(await _listener.AcceptTcpClientAsync(token).ConfigureAwait(false), token);
@@ -71,6 +71,7 @@ public class AuthLibProtocol(IPAddress address, int port, string modList, string
                 Log.Warning("Accept loop error: {0}", ex2.Message);
                 break;
             }
+        }
     }
 
     private static async Task ReadExactAsync(NetworkStream stream, byte[] buffer, int offset, int count, CancellationToken token)

@@ -1,101 +1,111 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 
 namespace Nirvana.Game.Launcher.Services.Java.RPC.Events;
 
-public static class SimplePack {
+public static class SimplePack
+{
     public static byte[]? Pack(params object[]? data)
     {
         if (data == null) {
             return null;
         }
-
-        var array = Array.Empty<byte>();
-        foreach (var obj in data) {
-            var array2 = Array.Empty<byte>();
-            switch (obj) {
-                case byte[] bytes1:
-                    array2 = bytes1;
-                    break;
-                case List<uint> uints: {
-                    var list = new List<byte>();
-                    var bytes = BitConverter.GetBytes((ushort)(uints.Count * 4));
-                    list.AddRange(array2);
-                    list.AddRange(bytes);
-                    foreach (var item in uints) {
-                        list.AddRange(BitConverter.GetBytes(item));
-                    }
-
-                    array2 = list.ToArray();
-                    break;
-                }
-                case List<ulong> ulongs: {
-                    var list2 = new List<byte>();
-                    var bytes2 = BitConverter.GetBytes((ushort)(ulongs.Count * 8));
-                    list2.AddRange(array2);
-                    list2.AddRange(bytes2);
-                    foreach (var item2 in ulongs) {
-                        list2.AddRange(BitConverter.GetBytes(item2));
-                    }
-
-                    array2 = list2.ToArray();
-                    break;
-                }
-                case List<long> longs: {
-                    var list3 = new List<byte>();
-                    var bytes3 = BitConverter.GetBytes((ushort)(longs.Count * 8));
-                    list3.AddRange(array2);
-                    list3.AddRange(bytes3);
-                    foreach (var item3 in longs) {
-                        list3.AddRange(BitConverter.GetBytes(item3));
-                    }
-
-                    array2 = list3.ToArray();
-                    break;
-                }
-                case bool boolValue:
-                    array2 = BitConverter.GetBytes(boolValue);
-                    break;
-                case byte byteValue:
-                    array2 = [byteValue];
-                    break;
-                case short shortValue:
-                    array2 = BitConverter.GetBytes(shortValue);
-                    break;
-                case ushort ushortValue:
-                    array2 = BitConverter.GetBytes(ushortValue);
-                    break;
-                case int intValue:
-                    array2 = BitConverter.GetBytes(intValue);
-                    break;
-                case uint uintValue:
-                    array2 = BitConverter.GetBytes(uintValue);
-                    break;
-                case long longValue:
-                    array2 = BitConverter.GetBytes(longValue);
-                    break;
-                case ulong ulongValue:
-                    array2 = BitConverter.GetBytes(ulongValue);
-                    break;
-                case float floatValue:
-                    array2 = BitConverter.GetBytes(floatValue);
-                    break;
-                case double doubleValue:
-                    array2 = BitConverter.GetBytes(doubleValue);
-                    break;
-                case string stringValue:
-                    array2 = Encoding.UTF8.GetBytes(stringValue);
-                    array2 = Pack((ushort)array2.Length, array2);
-                    break;
-            }
-
-            if (array2 != null) {
-                array = array.Concat(array2).ToArray();
-            }
+        using var buffer = new MemoryStream();
+        foreach (var obj in data)
+        {
+            WriteValue(buffer, obj);
         }
+        return buffer.ToArray();
+    }
 
-        return array;
+    private static void WriteValue(MemoryStream buffer, object obj)
+    {
+        switch (obj)
+        {
+            case bool v: {
+                buffer.Write(BitConverter.GetBytes(v));
+                break;
+            }
+            case byte v: {
+                buffer.WriteByte(v);
+                break;
+            }
+            case short v: {
+                buffer.Write(BitConverter.GetBytes(v));
+                break;
+            }
+            case ushort v: {
+                buffer.Write(BitConverter.GetBytes(v));
+                break;
+            }
+            case int v: {
+                buffer.Write(BitConverter.GetBytes(v));
+                break;
+            }
+            case uint v: {
+                buffer.Write(BitConverter.GetBytes(v));
+                break;
+            }
+            case long v: {
+                buffer.Write(BitConverter.GetBytes(v));
+                break;
+            }
+            case ulong v: {
+                buffer.Write(BitConverter.GetBytes(v));
+                break;
+            }
+            case float v: {
+                buffer.Write(BitConverter.GetBytes(v));
+                break;
+            }
+            case double v: {
+                buffer.Write(BitConverter.GetBytes(v));
+                break;
+            }
+            case string v: {
+                WriteString(buffer, v);
+                break;
+            }
+            case byte[] v: {
+                buffer.Write(v);
+                break;
+            }
+            case List<uint> v: {
+                WritePrimitiveList(buffer, v, sizeof(uint), BitConverter.GetBytes);
+                break;
+            }
+            case List<ulong> v: {
+                WritePrimitiveList(buffer, v, sizeof(ulong), BitConverter.GetBytes);
+                break;
+            }
+            case List<long> v: {
+                WritePrimitiveList(buffer, v, sizeof(long), BitConverter.GetBytes);
+                break;
+            }
+            default:
+                throw new NotSupportedException($"SimplePack does not support type: {obj.GetType().FullName}");
+        }
+    }
+
+    private static void WriteString(MemoryStream buffer, string value)
+    {
+        var utf8 = Encoding.UTF8.GetBytes(value);
+        buffer.Write(BitConverter.GetBytes((ushort)utf8.Length));
+        buffer.Write(utf8);
+    }
+
+    private static void WritePrimitiveList<T>(
+        MemoryStream buffer,
+        List<T> list,
+        int elementSize,
+        Func<T, byte[]> converter)
+    {
+        buffer.Write(BitConverter.GetBytes((ushort)(list.Count * elementSize)));
+        foreach (var item in list)
+        {
+            buffer.Write(converter(item));
+        }
     }
 }

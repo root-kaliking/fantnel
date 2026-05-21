@@ -69,7 +69,7 @@ public class MPay : IDisposable {
     {
         var buildDeviceParams = BuildDeviceParams();
         buildDeviceParams.Add("unique_id", _unique);
-        var obj = await _service.PostAsync("/mpay/games/" + gameId + "/devices", buildDeviceParams.BuildQueryString(), "application/x-www-form-urlencoded");
+        var obj = await _service.PostAsync("/mpay/games/" + gameId + "/devices", buildDeviceParams.BuildQuery(), "application/x-www-form-urlencoded");
         obj.EnsureSuccessStatusCode();
         var text = await obj.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<EntityDeviceResponse>(text)?.EntityDevice ?? throw new Exception("Failed to create device");
@@ -91,7 +91,7 @@ public class MPay : IDisposable {
         queryString.Add("opt_fields", "nickname,avatar,realname_status,mobile_bind_status,mask_related_mobile,related_login_status");
         queryString.Add("params", value);
         queryString.Add("un", email.EncodeBase64());
-        var response = await _service.PostAsync($"/mpay/games/{GameId}/devices/{_device.Id}/users", queryString.BuildQueryString(), "application/x-www-form-urlencoded");
+        var response = await _service.PostAsync($"/mpay/games/{GameId}/devices/{_device.Id}/users", queryString.BuildQuery(), "application/x-www-form-urlencoded");
         var text = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode) {
             var entityVerifyResponse = JsonSerializer.Deserialize<EntityVerifyResponse>(text);
@@ -115,7 +115,7 @@ public class MPay : IDisposable {
         var queryBuilder = BuildBaseParams();
         queryBuilder.Add("device_id", _device.Id);
         queryBuilder.Add("mobile", phoneNumber);
-        var response = await _service.PostAsync("/mpay/api/users/login/mobile/get_sms", queryBuilder.BuildQueryString(), "application/x-www-form-urlencoded");
+        var response = await _service.PostAsync("/mpay/api/users/login/mobile/get_sms", queryBuilder.BuildQuery(), "application/x-www-form-urlencoded");
         var propertyValue = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode) {
             Log.Error("Failed to send sms code, response: {Json}", propertyValue);
@@ -131,7 +131,7 @@ public class MPay : IDisposable {
         queryBuilder.Add("mobile", phoneNumber);
         queryBuilder.Add("smscode", code);
         queryBuilder.Add("up_content", "");
-        var response = await _service.PostAsync("/mpay/api/users/login/mobile/verify_sms", queryBuilder.BuildQueryString(), "application/x-www-form-urlencoded");
+        var response = await _service.PostAsync("/mpay/api/users/login/mobile/verify_sms", queryBuilder.BuildQuery(), "application/x-www-form-urlencoded");
         var text = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode) {
             return JsonSerializer.Deserialize<EntitySmsTicket>(text);
@@ -148,7 +148,7 @@ public class MPay : IDisposable {
         queryBuilder.Add("device_id", _device.Id);
         queryBuilder.Add("opt_fields", "nickname,avatar,realname_status,mobile_bind_status,mask_related_mobile,related_login_status");
         queryBuilder.Add("ticket", ticket);
-        var response = await _service.PostAsync("/mpay/api/users/login/mobile/finish?un=" + text, queryBuilder.BuildQueryString(), "application/x-www-form-urlencoded");
+        var response = await _service.PostAsync("/mpay/api/users/login/mobile/finish?un=" + text, queryBuilder.BuildQuery(), "application/x-www-form-urlencoded");
         var text2 = await response.Content.ReadAsStringAsync();
         if (response.IsSuccessStatusCode) {
             return JsonSerializer.Deserialize<EntityMPayUserResponse>(text2);

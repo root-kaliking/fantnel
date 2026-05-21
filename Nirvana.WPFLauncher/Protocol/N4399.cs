@@ -21,12 +21,15 @@ public static class N4399 {
         parameters.Add("inputCaptcha", captcha);
 
         var client = new HttpClient(new HttpClientHandler {
+            AllowAutoRedirect = true,
             UseCookies = true,
             CookieContainer = new CookieContainer()
         });
 
         // 执行登录请求
-        var loginResponse = await client.PostAsync("https://ptlogin.4399.com/ptlogin/login.do?v=1", new FormUrlEncodedContent(parameters.GetAll()));
+        const string contentType = "application/x-www-form-urlencoded";
+        var loginContent = new StringContent(parameters.BuildQuery(), Encoding.UTF8, contentType);
+        var loginResponse = await client.PostAsync("https://ptlogin.4399.com/ptlogin/login.do?v=1", loginContent);
 
         var loginText = await loginResponse.Content.ReadAsStringAsync();
 
@@ -35,59 +38,84 @@ public static class N4399 {
         if (errText.Length > 0) {
             throw new Exception(errText);
         }
-
-        var cookieString = string.Join("; ", loginResponse.Headers.GetValues("Set-Cookie").Select(cookie => cookie.Split(';')[0].Trim()).ToArray());
+        
 
         // 生成SAuth令牌
-        var sAuthToken = await GenerateSAuthAsync(client, cookieString);
+        var sAuthToken = await GenerateSAuthAsync(client);
         return sAuthToken;
     }
 
     private static string ExtractErrorTip(string html)
     {
+        if (!html.Contains("<html>")) {
+            return html.Trim();
+        }
+
         const string startMarker = "login_err_tip\">";
         const string endMarker = "</div>";
 
         var startIndex = html.IndexOf(startMarker, StringComparison.Ordinal);
-        if (startIndex == -1) return string.Empty;
+        if (startIndex == -1) {
+            return string.Empty;
+        }
 
         startIndex += startMarker.Length;
         var endIndex = html.IndexOf(endMarker, startIndex, StringComparison.Ordinal);
 
-        if (endIndex == -1) return string.Empty;
+        if (endIndex == -1) {
+            return string.Empty;
+        }
 
         // 提取内容并删除前后空格
         var content = html.Substring(startIndex, endIndex - startIndex);
         return content.Trim();
     }
 
-    private static async Task<string> GenerateSAuthAsync(HttpClient client, string cookieString)
+    private static async Task<string> GenerateSAuthAsync(HttpClient client)
     {
         var unixTimeSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var loginQuery = new QueryBuilder();
+        loginQuery.Add("v", "2018_11_26_16");
+        loginQuery.Add("postLoginHandler", "redirect");
+        loginQuery.Add("checkLoginUserCookie", "true");
+        loginQuery.Add("redirectUrl", $"https://cdn.h5wan.4399sj.com/microterminal-h5-frame?game_id=500352&rand_time={unixTimeSeconds}");
+
+        var ucenterQuery = new QueryBuilder();
+        ucenterQuery.Add("action", "login");
+        ucenterQuery.Add("appId", "kid_wdsj");
+        ucenterQuery.Add("loginLevel", "8");
+        ucenterQuery.Add("regLevel", "8");
+        ucenterQuery.Add("bizId", "2201001794");
+        ucenterQuery.Add("externalLogin", "qq");
+        ucenterQuery.Add("qrLogin", "true");
+        ucenterQuery.Add("layout", "vertical");
+        ucenterQuery.Add("level", "101");
+        ucenterQuery.Add("css", $"https://microgame.5054399.net/v2/resource/cssSdk/default/login.css?{loginQuery}");
+
+        var queryBuilder = new QueryBuilder();
+        queryBuilder.Add("appId", "kid_wdsj");
+        queryBuilder.Add("gameUrl", "https://cdn.h5wan.4399sj.com/microterminal-h5-frame?game_id=500352");
+        queryBuilder.Add("isCrossDomain", "1");
+        queryBuilder.Add("nick", "null");
+        queryBuilder.Add("onLineStart", "false");
+        queryBuilder.Add("ptLogin", "true");
+        queryBuilder.Add("rand_time", "$randTime");
+        queryBuilder.Add("retUrl", $"https://ptlogin.4399.com/resource/ucenter.html?{ucenterQuery}");
+        queryBuilder.Add("show", "1");
 
         // 检查登录状态
-        var checkUrl = "https://ptlogin.4399.com/ptlogin/checkKidLoginUserCookie.do?" + "appId=kid_wdsj&gameUrl=http://cdn.h5wan.4399sj.com/microterminal-h5-frame?" + "game_id=500352&rand_time=" + unixTimeSeconds + "&nick=null&onLineStart=false&" + "show=1&isCrossDomain=1&retUrl=http%253A%252F%252Fptlogin.4399.com" + "%252Fresource%252Fucenter.html%253Faction%253Dlogin%2526appId%253Dkid_wdsj%2526" + "loginLevel%253D8%2526regLevel%253D8%2526bizId%253D2100001792%2526externalLogin%253D" + "qq%2526qrLogin%253Dtrue%2526layout%253Dvertical%2526level%253D101%2526" + "css%253Dhttp%253A%252F%252Fmicrogame.5054399.net%252Fv2%252Fresource%252F" + "cssSdk%252Fdefault%252Flogin.css%2526v%253D2018_11_26_16%2526" + "postLoginHandler%253Dredirect%2526checkLoginUserCookie%253Dtrue%2526" + "redirectUrl%253Dhttp%25253A%25252F%25252Fcdn.h5wan.4399sj.com%25252F" + "microterminal-h5-frame%25253Fgame_id%25253D500352%252526rand_time%25253D" + unixTimeSeconds;
+        var checkUrl = $"https://ptlogin.4399.com/ptlogin/checkKidLoginUserCookie.do?{queryBuilder}";
 
-
-        HttpResponseMessage? checkResponse = null;
-        for (var i = 0; i < 4; i++) {
-            var request = new HttpRequestMessage(HttpMethod.Get, checkUrl);
-            request.Headers.Add("Cookie", cookieString);
-            checkResponse = await client.SendAsync(request);
-            if (checkResponse.Headers.Location == null) {
-                break;
-            }
-
-            checkUrl = checkResponse.Headers.Location.ToString();
-        }
-
-        if (checkResponse?.RequestMessage?.RequestUri == null) {
+        var checkResponse = await client.GetAsync(checkUrl);
+        if (checkResponse.RequestMessage == null || checkResponse.RequestMessage.RequestUri == null) {
             throw new Exception("登录状态检查失败");
         }
 
         var redirectUri = checkResponse.RequestMessage.RequestUri.ToString();
-
         var queryParams = QueryBuilder.FromParameters(redirectUri);
+        if (!queryParams.Contains("sig")) {
+            throw new Exception("登录状态检查失败");
+        }
 
         // 获取统一认证信息
         var uniAuth = await GetUniAuthAsync(queryParams, client);
@@ -111,25 +139,28 @@ public static class N4399 {
     private static QueryBuilder BuildLoginParameters()
     {
         var queryBuilder = new QueryBuilder();
-        queryBuilder.Add("loginFrom", "uframe");
-        queryBuilder.Add("postLoginHandler", "default");
-        queryBuilder.Add("layoutSelfAdapting", "true");
-        queryBuilder.Add("externalLogin", "qq");
-        queryBuilder.Add("displayMode", "popup");
-        queryBuilder.Add("layout", "vertical");
-        queryBuilder.Add("bizId", "2100001792");
         queryBuilder.Add("appId", "kid_wdsj");
-        queryBuilder.Add("gameId", "wd");
+        queryBuilder.Add("autoLogin", "on");
+        queryBuilder.Add("bizId", "2201001794");
         queryBuilder.Add("css", "https://microgame.5054399.net/v2/resource/cssSdk/default/login.css");
-        queryBuilder.Add("redirectUrl", "");
-        queryBuilder.Add("mainDivId", "popup_login_div");
+        queryBuilder.Add("displayMode", "popup");
+        queryBuilder.Add("externalLogin", "qq");
+        queryBuilder.Add("gameId", "wd");
+        queryBuilder.Add("iframeId", "popup_login_frame");
         queryBuilder.Add("includeFcmInfo", "false");
+        queryBuilder.Add("layout", "vertical");
+        queryBuilder.Add("layoutSelfAdapting", "true");
         queryBuilder.Add("level", "8");
+        queryBuilder.Add("loginFrom", "uframe");
+        queryBuilder.Add("mainDivId", "popup_login_div");
+        queryBuilder.Add("postLoginHandler", "default");
+        queryBuilder.Add("redirectUrl", "");
         queryBuilder.Add("regLevel", "8");
+        queryBuilder.Add("sec", "1");
+        queryBuilder.Add("sessionId", "");
         queryBuilder.Add("userNameLabel", "4399用户名");
         queryBuilder.Add("userNameTip", "请输入4399用户名");
         queryBuilder.Add("welcomeTip", "欢迎回到4399");
-        queryBuilder.Add("sec", "1");
         return queryBuilder;
     }
 }
