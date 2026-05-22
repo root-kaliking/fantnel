@@ -157,7 +157,7 @@ public sealed class LauncherService : IDisposable {
 
         commandService.Init(enumVersion, Entity, workingDirectory, _skip32.GenerateRoleUuid(Entity.RoleName, Convert.ToUInt32(Entity.Account.GetUserId())), _socketPort, X19.GameVersion, availablePort);
 
-        return (commandService, rpcPort: availablePort);
+        return (commandService, availablePort);
     }
 
     private void LaunchRpcService(EnumGameVersion gameVersion, int rpcPort)

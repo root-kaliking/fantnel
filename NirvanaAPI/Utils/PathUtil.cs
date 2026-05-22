@@ -26,7 +26,8 @@ public static class PathUtil {
     public static readonly string GamePath = Path.Combine(CachePath, "Game");
 
     public static readonly string GameBasePath = Path.Combine(GamePath, "Base");
-
+    public static readonly string GameBaseMcPath = Path.Combine(GameBasePath, ".minecraft");
+    
     public static readonly string GameModsPath = Path.Combine(CachePath, "GameMods");
 
     public static readonly string CppGamePath = Path.Combine(CachePath, "CppGame");

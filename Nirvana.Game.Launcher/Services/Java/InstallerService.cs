@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Nirvana.Game.Launcher.Utils;
@@ -35,7 +36,41 @@ public static class InstallerService {
         var libZip = Path.Combine(PathUtil.CachePath, versionName + "_Lib.7z");
 
         await ProcessPackage(versionResult.CoreLibUrl, libZip, PathUtil.CachePath, libMd5File, versionResult.CoreLibMd5, versionName + " libraries");
+        InstallCoreLibs(Path.Combine(PathUtil.CachePath, versionName + "_libs"), gameVersion);
     }
+    
+    private static void InstallCoreLibs(string libPath, EnumGameVersion gameVersion)
+	{
+		var gameVersionFromEnum = GameVersionUtil.GetGameVersionFromEnum(gameVersion);
+		var fileList = Directory.GetFiles(libPath, "*", SearchOption.AllDirectories);
+        var javaList = Directory.GetFiles(Path.Combine(PathUtil.GameBaseMcPath, "libraries"), "*", SearchOption.AllDirectories);
+		foreach (var filePath in fileList)
+		{
+			var fileName = Path.GetFileName(filePath);
+            if (!fileName.EndsWith(".jar")) {
+                var path = Path.Combine(PathUtil.GameBaseMcPath, "versions", gameVersionFromEnum, fileName);
+                Log.Information("Installed {0} to {1}", filePath, path);
+                File.Copy(filePath, path, true);
+                continue;
+            }
+
+            var flag = true;
+            foreach (var javaPath in javaList) {
+                var javaFileName = Path.GetFileName(javaPath);
+                if (fileName.Equals(javaFileName)) {
+                    flag = false;
+                    Log.Information("Installed {0} to {1}", filePath, javaPath);
+                    File.Copy(filePath, javaPath, true);
+                    break;
+                }
+            }
+            
+            if (flag) {
+                Log.Warning("Failed to install {0}", fileName);
+            }
+            
+        }
+	}
 
     private static async Task ProcessPackage(string url, string zipPath, string extractTo, string md5Path, string md5, string label)
     {
@@ -80,7 +115,7 @@ public static class InstallerService {
                 idx++;
                 var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(subEntity.ResName);
                 var jar = Path.Combine(corePath, $"{fileNameWithoutExtension}@{entityComponentDownloadInfoResponse.MTypeId}@{entityComponentDownloadInfoResponse.EntityId}.jar");
-                if (File.Exists(jar) && FileUtil.ComputeMd5FromFile(jar).Equals(subEntity.JarMd5, StringComparison.OrdinalIgnoreCase)) {
+                if (File.Exists(jar) && FileUtil.EqualsMd5FromFile(jar, subEntity.JarMd5)) {
                     continue;
                 }
 
@@ -99,7 +134,9 @@ public static class InstallerService {
                         Message = $"Extracting core mod {idx}/{entities.Length}"
                     });
                 });
-                FileUtil.DeleteFileSafe(archive);
+                if (Tools.IsReleaseVersion()) {
+                    FileUtil.DeleteFileSafe(archive);
+                }
                 var array = FileUtil.EnumerateFiles(extractDir, "jar");
                 foreach (var t in array) {
                     FileUtil.CopyFileSafe(t, jar);
@@ -145,8 +182,9 @@ public static class InstallerService {
                         Message = "Extracting game assets"
                     });
                 });
-                FileUtil.DeleteFileSafe(compArchive);
-
+                if (Tools.IsReleaseVersion()) {
+                    FileUtil.DeleteFileSafe(compArchive);
+                }
                 var array2 = FileUtil.EnumerateFiles(Path.Combine(compDir, ".minecraft", "mods"), "jar");
                 var serverModsList = new EntityModsList();
                 foreach (var path in array2) {
@@ -157,7 +195,7 @@ public static class InstallerService {
                         ModPath = jar,
                         Id = jar,
                         Iid = jar.Split('@')[0],
-                        Md5 = FileUtil.ComputeMd5FromFile(path).ToUpper()
+                        Md5 = FileUtil.ComputeMd5FromFile(path)
                     });
                 }
 
@@ -173,36 +211,37 @@ public static class InstallerService {
         return modList;
     }
 
-    private static void InstallCustomMods(string mods)
+    private static void InstallCustomMods(string mods, string gameId)
     {
-        foreach (var filePath in FileUtil.EnumerateFiles(PathUtil.CustomModsPath, "jar")) {
-            FileUtil.CopyFileSafe(filePath, Path.Combine(mods, Path.GetFileName(filePath)));
-        }
+        FileUtil.CopyDirectory(Path.Combine(PathUtil.CustomModsPath, gameId), mods, true);
     }
 
     public static string PrepareGameRuntime(string gameId, string roleName, EnumGType gameType)
     {
-        var path = gameId + "-" + roleName;
-        var text = Path.Combine(PathUtil.GamePath, "Runtime", path);
-        var text2 = Path.Combine(text, ".minecraft");
-
-        Directory.CreateDirectory(text);
-        Directory.CreateDirectory(text2);
-
+        var path = Path.Combine(PathUtil.GamePath, "Runtime", gameId + "-" + roleName);
+        var minecraft = Path.Combine(path, ".minecraft");
+        var mods = Path.Combine(minecraft, "mods");
+        
+        InstallCustomMods(mods, gameId); // 会创建mods目录
+        
         if (gameType == EnumGType.NetGame) {
-            var text3 = Path.Combine(text2, "mods");
-            FileUtil.DeleteDirectorySafe(text3);
-            Directory.CreateDirectory(text3);
-            FileUtil.CopyDirectory(Path.Combine(PathUtil.CachePath, "Game", gameId, ".minecraft"), text2, false);
-            InstallCustomMods(text3);
+            FileUtil.CleanDirectorySafe(mods);
+            var sourceDir = Path.Combine(PathUtil.GamePath, gameId, ".minecraft");
+            FileUtil.CopyDirectory(sourceDir, minecraft, true);
+            // 因为 heypixel 的 protocol mod 会使用 win-jna, 所以无法使用
+            if ("4661334467366178884".Equals(gameId) && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                foreach (var filePath in FileUtil.GetFilesByDirectoryByFileSize(mods, 50_000_000, "*.jar")) {
+                    FileUtil.DeleteFileSafe(filePath);
+                }
+            }
         }
 
-        var linkPath = Path.Combine(text2, "assets");
-        var targetPath = Path.Combine(PathUtil.GameBasePath, ".minecraft", "assets");
+        var linkPath = Path.Combine(minecraft, "assets");
+        var targetPath = Path.Combine(PathUtil.GameBaseMcPath, "assets");
 
         // 创建assets目录符号链接
         Tools.CreateSymbolicLink(linkPath, targetPath);
-        return text;
+        return path;
     }
 
     public static void InstallCoreMods(string gameId, string targetModsPath)

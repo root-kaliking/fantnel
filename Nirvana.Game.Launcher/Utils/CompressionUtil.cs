@@ -147,6 +147,8 @@ public static class CompressionUtil {
      */
     private static async Task ProcessEntriesFromQueueAsync(ConcurrentQueue<IArchiveEntry> entriesQueue, string destinationPath, Action<double>? progress, ProgressState progressState) // 传入封装了状态的对象
     {
+        var lastPercentage = -1.0;
+
         while (entriesQueue.TryDequeue(out var entry))
             try {
                 // 5. 执行单个文件的解压和写入操作
@@ -156,7 +158,10 @@ public static class CompressionUtil {
                 lock (progressState.Lock) {
                     progressState.ProcessedCount++;
                     var currentPercentage = progressState.ProcessedCount * 100.0 / progressState.TotalEntries;
-                    progress?.Invoke(currentPercentage);
+                    if (Math.Abs(currentPercentage - lastPercentage) > 0.1) {
+                        lastPercentage = currentPercentage;
+                        progress?.Invoke(currentPercentage);
+                    }
                 }
             }
     }

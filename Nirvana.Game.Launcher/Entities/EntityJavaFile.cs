@@ -73,7 +73,7 @@ public class EntityJavaFile {
     {
         var it = FixPath(path);
         _filePath1 = it;
-        _filePath = it.Contains(PathUtil.GameBasePath) ? it : Path.Combine(PathUtil.GameBasePath, ".minecraft", it);
+        _filePath = it.Contains(PathUtil.GameBasePath) ? it : Path.Combine(PathUtil.GameBaseMcPath, it);
     }
 
     public bool Equals(string path)

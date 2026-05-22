@@ -73,7 +73,7 @@ public class CommandService {
             }
         }
 
-        var path = Path.Combine(PathUtil.GameBasePath, ".minecraft", "versions", _version, _version + ".json");
+        var path = Path.Combine(PathUtil.GameBaseMcPath, "versions", _version, _version + ".json");
         if (!File.Exists(path)) {
             throw new Exception("Game version JSON not found, please go to Setting to fix the game file and try again.");
         }
@@ -415,8 +415,8 @@ public class CommandService {
             }
         }
 
-        jvmArguments = jvmArguments.Replace("${library_directory}", Path.Combine(PathUtil.GameBasePath, ".minecraft", "libraries"));
-        jvmArguments = GameArgumentsUtil.UpdateArguments("libraryDirectory", Path.Combine(PathUtil.GameBasePath, ".minecraft", "libraries"), jvmArguments, CommandMode.Mode5, CommandMode.Mode6);
+        jvmArguments = jvmArguments.Replace("${library_directory}", Path.Combine(PathUtil.GameBaseMcPath, "libraries"));
+        jvmArguments = GameArgumentsUtil.UpdateArguments("libraryDirectory", Path.Combine(PathUtil.GameBaseMcPath, "libraries"), jvmArguments, CommandMode.Mode5, CommandMode.Mode6);
         jvmArguments = GameArgumentsUtil.DeleteArguments("Xmx", jvmArguments, CommandMode.Mode14);
 
         if (_launcherGame == null) {
@@ -452,7 +452,7 @@ public class CommandService {
         minecraftArguments = minecraftArguments.Replace("${auth_player_name}", _launcherGame.RoleName);
         minecraftArguments = minecraftArguments.Replace("${auth_uuid}", _uuid);
         minecraftArguments = minecraftArguments.Replace("--versionType ${version_type}", string.Empty);
-        minecraftArguments = minecraftArguments.Replace("${assets_root}", Path.Combine(PathUtil.GameBasePath, ".minecraft", "assets"));
+        minecraftArguments = minecraftArguments.Replace("${assets_root}", Path.Combine(PathUtil.GameBaseMcPath, "assets"));
         minecraftArguments = minecraftArguments.Replace("${assets_index_name}", version);
 
         minecraftArguments = minecraftArguments.Replace("${auth_access_token}", _gameVersion >= EnumGameVersion.V_1_18 ? "0" : RandomUtil.GetRandomString(32, "ABCDEF0123456789"));
@@ -484,13 +484,13 @@ public class CommandService {
         var combinedPaths = new StringBuilder();
         foreach (var pathSegment in source) {
             var fullPath = pathSegment.Replace(";", "");
-            fullPath = fullPath.Replace(":", "");
+            // fullPath = fullPath.Replace(":", "");
             fullPath = EntityJavaFile.FixPath(fullPath); // 有分割符
 
             var filePath = fullPath; // 不完整路径
 
             var fullPath1 = filePath; // 无分割符
-            fullPath1 = Path.Combine(PathUtil.GameBasePath, ".minecraft", fullPath1);
+            fullPath1 = Path.Combine(PathUtil.GameBaseMcPath, fullPath1);
 
             fullPath = fullPath1 + PathUtil.PathSeparator; // 修复 linux/mac 引用出错
 
@@ -544,7 +544,7 @@ public class CommandService {
 
     private string AddNativePath(string nativesPath)
     {
-        var natives = Path.Combine(PathUtil.GameBasePath, ".minecraft", nativesPath);
+        var natives = Path.Combine(PathUtil.GameBaseMcPath, nativesPath);
         _nativesPath = natives;
         
         // 避免 linux 出现权限问题

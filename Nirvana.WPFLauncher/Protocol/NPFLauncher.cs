@@ -452,9 +452,9 @@ public static class NPFLauncher {
     /**
      * 获取游戏皮肤
      */
-    public static async Task<List<EntityUserGameTexture>?> GetSkinListInGameAAsync(EntityUserGameTextureRequest userGame)
+    public static async Task<EntityUserGameTexture[]?> GetSkinListInGameAAsync(EntityUserGameTextureRequest userGame)
     {
-        var entity = await X19Extensions.Gateway.Api<EntityWPFLauncher<List<EntityUserGameTexture>>>("/user-game-skin/query/search-by-type", userGame);
+        var entity = await X19Extensions.Gateway.Api<EntitiesWPFLauncher<EntityUserGameTexture>>("/user-game-skin/query/search-by-type", userGame);
         return entity?.Data;
     }
 

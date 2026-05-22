@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -20,6 +21,11 @@ public static class FileUtil {
         return Directory.EnumerateFiles(path, searchPattern, SearchOption.AllDirectories).ToArray();
     }
 
+    /**
+    * 计算文件的MD5哈希值
+    * @param filePath 文件绝对路径
+    * @return 文件的MD5哈希值（小写）
+    */
     public static string ComputeMd5FromFile(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) {
@@ -29,12 +35,17 @@ public static class FileUtil {
         try {
             using var inputStream = File.OpenRead(path);
             using var mD = MD5.Create();
-            return Convert.ToHexString(mD.ComputeHash(inputStream)).ToLowerInvariant();
+            return Convert.ToHexString(mD.ComputeHash(inputStream)).ToUpperInvariant();
         } catch (IOException) {
             return string.Empty;
         } catch (UnauthorizedAccessException) {
             return string.Empty;
         }
+    }
+
+    public static bool EqualsMd5FromFile(string path, string md5)
+    {
+        return ComputeMd5FromFile(path).Equals(md5, StringComparison.OrdinalIgnoreCase);
     }
 
     public static void CleanDirectorySafe(string path)
@@ -58,6 +69,12 @@ public static class FileUtil {
         } catch (IOException) { } catch (UnauthorizedAccessException) { }
     }
 
+    public static string[] GetFilesByDirectoryByFileSize(string path, int fileSize, string? searchPattern = null)
+    {
+        var files = EnumerateFiles(path, searchPattern);
+        return files.Where(filePath => new FileInfo(filePath).Length > fileSize).ToArray();
+    }
+
     public static bool CopyFileSafe(string sourcePath, string destPath)
     {
         if (string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(destPath)) {
@@ -79,30 +96,28 @@ public static class FileUtil {
             return false;
         }
     }
-
-    public static void CopyDirectory(string sourceDir, string targetDir, bool includeRoot = true, bool deleteSource = false)
+    
+    public static void CopyDirectory(string sourceDir, string destDir, bool overwrite = false)
     {
-        if (string.IsNullOrWhiteSpace(sourceDir) || !Directory.Exists(sourceDir)) {
-            return;
+
+        // 创建目标目录
+        Directory.CreateDirectory(sourceDir); // 防止源目录不存在导致异常
+        Directory.CreateDirectory(destDir); // 防止目标目录不存在导致异常
+        
+        var dir = new DirectoryInfo(sourceDir);
+
+        // 复制所有文件
+        foreach (var file in dir.GetFiles())
+        {
+            var targetFile = Path.Combine(destDir, file.Name);
+            file.CopyTo(targetFile, overwrite);
         }
 
-        var name = new DirectoryInfo(sourceDir).Name;
-        var text = includeRoot ? Path.Combine(targetDir, name) : targetDir;
-        Directory.CreateDirectory(text);
-        foreach (var item in Directory.EnumerateFileSystemEntries(sourceDir)) {
-            var fileName = Path.GetFileName(item);
-            var destFileName = Path.Combine(text, fileName);
-            if (Directory.Exists(item)) {
-                CopyDirectory(item, text, true, deleteSource);
-                if (deleteSource) {
-                    Directory.Delete(item, true);
-                }
-            } else {
-                File.Copy(item, destFileName, true);
-                if (deleteSource) {
-                    File.Delete(item);
-                }
-            }
+        // 递归复制所有子目录
+        foreach (var subDir in dir.GetDirectories())
+        {
+            var targetSubDir = Path.Combine(destDir, subDir.Name);
+            CopyDirectory(subDir.FullName, targetSubDir, overwrite);
         }
     }
 
