@@ -19,7 +19,7 @@ public static class NCom4399 {
         return LoginWithPasswordAsync(username, password, sessionId, captcha).GetAwaiter().GetResult();
     }
 
-    public static async Task<string> LoginWithPasswordAsync(string username, string password, string sessionId, string captcha)
+    private static async Task<string> LoginWithPasswordAsync(string username, string password, string sessionId, string captcha)
     {
         var oauthResp = await Client.GetAsync("https://m.4399api.com/openapi/oauth-callback.html?gamekey=44770&game_key=115716");
         var oauthText = await oauthResp.Content.ReadAsStringAsync();

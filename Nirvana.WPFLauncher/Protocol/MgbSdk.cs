@@ -44,9 +44,8 @@ public class MgbSdk(string gameId) : IDisposable {
         if (dictionary == null) {
             throw new HttpRequestException("Response is empty");
         }
-
         if (!"200".Equals(dictionary["code"].ToString())) {
-            throw new HttpRequestException(dictionary["status"].ToString());
+            throw new HttpRequestException(dictionary["msg"].ToString());
         }
     }
 }

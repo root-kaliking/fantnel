@@ -232,7 +232,9 @@ public static class NPFLauncher {
     private static async Task<EntityAuthenticationOtp> AuthenticationOtpAsync(EntityX19CookieRequest cookieRequest, EntityLoginOtp otp)
     {
         var entityX19Cookie = JsonSerializer.Deserialize<EntityX19Cookie>(cookieRequest.Json);
-        if (entityX19Cookie == null) throw new ErrorCodeException(ErrorCode.LoginError);
+        if (entityX19Cookie == null) {
+            throw new ErrorCodeException(ErrorCode.LoginError);
+        }
         var upper = StringGenerator.GenerateHexString(4).ToUpper();
         var authenticationDetail = new EntityAuthenticationDetail {
             Udid = "0000000000000000" + upper,
@@ -351,7 +353,9 @@ public static class NPFLauncher {
             PriceType = 3,
             SecondaryTypeId = 31
         });
-        if (entity == null) throw new ErrorCodeException();
+        if (entity == null) {
+            throw new ErrorCodeException();
+        }
         return entity.Code != 0 ? throw new EntityX19Exception(entity.Message, entity) : entity.SafeEntity();
     }
 
@@ -465,7 +469,6 @@ public static class NPFLauncher {
     {
         var entity = await X19Extensions.Client.Api<EntitiesWPFLauncher<EntityRentalGame>>("/rental-server/query/available-public-server", new EntityQueryRentalGame {
             Offset = offset,
-            SortType = 0
         });
         return entity == null ? throw new ErrorCodeException() : entity.SafeEntity();
     }

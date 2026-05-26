@@ -26,11 +26,12 @@ public static class N4399 {
             CookieContainer = new CookieContainer()
         });
 
-        // 执行登录请求
-        const string contentType = "application/x-www-form-urlencoded";
-        var loginContent = new StringContent(parameters.BuildQuery(), Encoding.UTF8, contentType);
-        var loginResponse = await client.PostAsync("https://ptlogin.4399.com/ptlogin/login.do?v=1", loginContent);
-
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://ptlogin.4399.com/ptlogin/login.do?v=1");
+        request.Headers.Add("Referer", "http://ptlogin.4399.com/ptlogin/loginFrame.do");
+        request.Content = new StringContent(parameters.BuildQuery(), Encoding.UTF8, "application/x-www-form-urlencoded");;
+        
+        var loginResponse = await client.SendAsync(request);
+        
         var loginText = await loginResponse.Content.ReadAsStringAsync();
 
         // 找到错误信息
@@ -39,7 +40,8 @@ public static class N4399 {
             throw new Exception(errText);
         }
         
-
+        // client.DefaultRequestHeaders.Add("Cookie", loginResponse.Headers.GetValues("Set-Cookie"));
+        
         // 生成SAuth令牌
         var sAuthToken = await GenerateSAuthAsync(client);
         return sAuthToken;
@@ -116,7 +118,7 @@ public static class N4399 {
         if (!queryParams.Contains("sig")) {
             throw new Exception("登录状态检查失败");
         }
-
+        
         // 获取统一认证信息
         var uniAuth = await GetUniAuthAsync(queryParams, client);
 
@@ -126,9 +128,26 @@ public static class N4399 {
 
     private static async Task<QueryBuilder> GetUniAuthAsync(QueryBuilder queryParams, HttpClient client)
     {
-        var sdkUrl = new StringBuilder("https://microgame.5054399.net/v2/service/sdk/info?").Append("callback=&queryStr=game_id%3D500352%26nick%3Dnull%26sig%3D").Append(queryParams.Get("sig")).Append("%26uid%3D").Append(queryParams.Get("uid")).Append("%26fcm%3D0%26show%3D1%26isCrossDomain%3D1%26rand_time%3D").Append(queryParams.Get("rand_time")).Append("%26ptusertype%3D4399%26time%3D").Append(queryParams.Get("time")).Append("%26validateState%3D").Append(queryParams.Get("validateState")).Append("%26username%3D").Append(queryParams.Get("username")).Append("&_=").Append(queryParams.Get("time"));
+        var queryStr = new QueryBuilder();
+        queryStr.Add("game_id", "500352");
+        queryStr.Add("nick", "null");
+        queryStr.Add("sig", queryParams.Get("sig"));
+        queryStr.Add("uid", queryParams.Get("uid"));
+        queryStr.Add("fcm", "0");
+        queryStr.Add("isCrossDomain", "1");
+        queryStr.Add("show", "1");
+        queryStr.Add("rand_time", "$randTime");
+        queryStr.Add("ptusertype", "4399");
+        queryStr.Add("ptLogin", "true");
+        queryStr.Add("time", queryParams.Get("time"));
+        queryStr.Add("validateState", queryParams.Get("validateState"));
+        queryStr.Add("username", queryParams.Get("username"));
+        
+        var queryBuilder = new QueryBuilder();
+        queryBuilder.Add("_", queryParams.Get("time"));
+        queryBuilder.Add("queryStr", queryStr);
 
-        var response = await client.GetAsync(sdkUrl.ToString());
+        var response = await client.GetAsync($"https://microgame.5054399.net/v2/service/sdk/info?{queryBuilder}");
 
         var responseText = await response.Content.ReadAsStringAsync();
         var uniAuthData = JsonSerializer.Deserialize<EntityC4399UniAuth>(responseText) ?? throw new Exception("解析统一认证数据失败");
@@ -139,28 +158,29 @@ public static class N4399 {
     private static QueryBuilder BuildLoginParameters()
     {
         var queryBuilder = new QueryBuilder();
-        queryBuilder.Add("appId", "kid_wdsj");
-        queryBuilder.Add("autoLogin", "on");
-        queryBuilder.Add("bizId", "2201001794");
-        queryBuilder.Add("css", "https://microgame.5054399.net/v2/resource/cssSdk/default/login.css");
-        queryBuilder.Add("displayMode", "popup");
-        queryBuilder.Add("externalLogin", "qq");
-        queryBuilder.Add("gameId", "wd");
-        queryBuilder.Add("iframeId", "popup_login_frame");
-        queryBuilder.Add("includeFcmInfo", "false");
-        queryBuilder.Add("layout", "vertical");
-        queryBuilder.Add("layoutSelfAdapting", "true");
-        queryBuilder.Add("level", "8");
-        queryBuilder.Add("loginFrom", "uframe");
-        queryBuilder.Add("mainDivId", "popup_login_div");
         queryBuilder.Add("postLoginHandler", "default");
+        queryBuilder.Add("layoutSelfAdapting", "true");
+        queryBuilder.Add("externalLogin", "qq");
+        queryBuilder.Add("displayMode", "popup");
+        queryBuilder.Add("layout", "vertical");
+        queryBuilder.Add("bizId", "2201001794");
+        queryBuilder.Add("appId", "kid_wdsj");
+        queryBuilder.Add("gameId", "wd");
+        // queryBuilder.Add("css", "https://microgame.5054399.net/v2/resource/cssSdk/default/login.css");
         queryBuilder.Add("redirectUrl", "");
-        queryBuilder.Add("regLevel", "8");
-        queryBuilder.Add("sec", "1");
         queryBuilder.Add("sessionId", "");
+        queryBuilder.Add("mainDivId", "popup_login_div");
+        queryBuilder.Add("includeFcmInfo", "false");
+        queryBuilder.Add("level", "8");
+        queryBuilder.Add("regLevel", "8");
         queryBuilder.Add("userNameLabel", "4399用户名");
         queryBuilder.Add("userNameTip", "请输入4399用户名");
         queryBuilder.Add("welcomeTip", "欢迎回到4399");
+        queryBuilder.Add("sec", "1");
+        // password
+        queryBuilder.Add("iframeId", "popup_login_frame");
+        // username
+        queryBuilder.Add("autoLogin", "on");
         return queryBuilder;
     }
 }

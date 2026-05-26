@@ -35,6 +35,12 @@ public class QueryBuilder {
         return queryBuilder;
     }
 
+    public QueryBuilder Add(string key, QueryBuilder value)
+    {
+        _parameters[key] = value.BuildQuery();
+        return this;
+    }
+
     public QueryBuilder Add(string key, string value)
     {
         _parameters[key] = value;
