@@ -27,7 +27,9 @@ public static class YggdrasilExtensions {
         private byte[] ToShortByteArray(bool littleEndian = true)
         {
             var bytes = BitConverter.GetBytes((short)value);
-            if (BitConverter.IsLittleEndian != littleEndian) Array.Reverse(bytes);
+            if (BitConverter.IsLittleEndian != littleEndian) {
+                Array.Reverse(bytes);
+            }
 
             return bytes;
         }

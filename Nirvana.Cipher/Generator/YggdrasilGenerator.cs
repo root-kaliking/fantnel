@@ -6,6 +6,7 @@ using Nirvana.Cipher.Entities.Yggdrasil;
 using Nirvana.Cipher.Extensions;
 using Nirvana.WPFLauncher.Protocol;
 using Org.BouncyCastle.Crypto;
+using Serilog;
 
 namespace Nirvana.Cipher.Generator;
 
@@ -48,11 +49,14 @@ public static class YggdrasilGenerator {
 
     public static byte[] GenerateInitializeMessage(GameProfile profile, byte[] loginSeed, byte[] signContent)
     {
-        var id = profile.User.GetAuthId();
-        var token = profile.User.GetAuthToken();
-        var seed = AesNoPadding.Encrypt(loginSeed, token);
-        var sign = BuildSign(profile, id, seed).EncodeSha256();
-
+        var authId = profile.User.GetAuthId();
+        var authToken = profile.User.GetAuthToken();
+        var seed = AesNoPadding.Encrypt(loginSeed, authToken);
+        var sign = BuildSign(profile, authId, seed).EncodeSha256();
+        
+        var signSha = Convert.ToHexString(sign);
+        Log.Information("YggdrasilGenerator.Sign: {0}", signSha);
+        
         var client = Rsa.RsaWithPkcs1(PublicKey, signContent, false);
 
         if (client.Length < ClientKeyLength + CheckSumLength) {
@@ -69,7 +73,7 @@ public static class YggdrasilGenerator {
         var signData = Rsa.RsaWithPkcs1(PrivateKey, clientKey.CombineWith(sign), true);
 
         using var stream = new MemoryStream();
-        stream.WriteInt(id);
+        stream.WriteInt(authId);
         stream.WriteBytes(seed);
         stream.WriteShortString(X19.GameVersion, false);
         stream.WriteByteLengthString(X19.Channel);
@@ -85,12 +89,12 @@ public static class YggdrasilGenerator {
         return message.ToArray();
     }
 
-    private static byte[] BuildSign(GameProfile profile, int id, byte[] seed)
+    private static byte[] BuildSign(GameProfile profile, int authId, byte[] seed)
     {
         using var stream = new MemoryStream();
         var encoding = Encoding.UTF8;
 
-        stream.WriteInt(id);
+        stream.WriteInt(authId);
         stream.WriteBytes(seed);
         stream.WriteBytes(encoding.GetBytes(X19.GameVersion));
         stream.WriteBytes(encoding.GetBytes(X19.Channel));
