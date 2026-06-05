@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Manager;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.RentalGame;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.RentalGame.GameCharacters;
 using Nirvana.WPFLauncher.Protocol;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.Public.Message;
@@ -100,7 +100,18 @@ public static class RentalGameMessage {
      * @param name 游戏角色名称
      * @return 服务器上的指定游戏角色
      */
-    public static async Task<EntityRentalGamePlayerList> GetUserName(string serverId, string name)
+    public static EntityRentalGamePlayerList GetUserName(string serverId, string name)
+    {
+        return GetUserNameAsync(serverId, name).GetAwaiter().GetResult();
+    }
+
+    /**
+     * 获取服务器上的指定游戏角色
+     * @param serverId 服务器ID
+     * @param name 游戏角色名称
+     * @return 服务器上的指定游戏角色
+     */
+    public static async Task<EntityRentalGamePlayerList> GetUserNameAsync(string serverId, string name)
     {
         for (var i = 0; i < 3; i++) {
             try {

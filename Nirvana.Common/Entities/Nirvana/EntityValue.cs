@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NirvanaAPI.Entities.Nirvana;
+namespace Nirvana.Common.Entities.Nirvana;
 
 public class EntityValue {
     [JsonPropertyName("value")]

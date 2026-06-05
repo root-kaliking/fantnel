@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nirvana.Common.Utils;
 using Nirvana.Game.Launcher.Utils;
 using Nirvana.Public.Message;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameDetails;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameSkin;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.RentalGame;
-using NirvanaAPI.Utils;
 using Serilog;
 
 namespace Nirvana.Public.Manager;
@@ -54,7 +54,7 @@ public class CacheManager {
                         try {
                             if (SkinMessage.SkinList.Count < 20) {
                                 Log.Information("正在开始缓存 Skin 服务器列表");
-                                SkinMessage.GetSkinList(0, 50).Wait();
+                                SkinMessage.GetSkinList(0, 50).GetAwaiter().GetResult();
                             }
                         } catch (Exception e) {
                             Log.Error("顶缓存 Skin 出错 : {0}", e.Message);

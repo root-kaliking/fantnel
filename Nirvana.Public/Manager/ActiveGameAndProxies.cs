@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Nirvana.Common.Manager;
 using Nirvana.Development;
 using Nirvana.Game.Launcher.Entities;
 using Nirvana.Game.Launcher.Services.Java;
 using Nirvana.Public.Entities.NEL;
-using NirvanaAPI.Manager;
 using Serilog;
 
 namespace Nirvana.Public.Manager;
@@ -161,7 +161,7 @@ public static class ActiveGameAndProxies {
             foreach (var launcher in ActiveLaunchers.ToList().Where(launcher => !launcher.IsRunning())) {
                 Log.Information("白端游戏 {0} 已清理", launcher.GetPid());
                 ActiveLaunchers.Remove(launcher);
-                launcher.ShutdownAsync().Wait();
+                launcher.ShutdownAsync().GetAwaiter().GetResult();
             }
         }
     }

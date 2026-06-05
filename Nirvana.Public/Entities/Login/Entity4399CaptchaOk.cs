@@ -3,7 +3,7 @@
 namespace Nirvana.Public.Entities.Login;
 
 public class Entity4399CaptchaOk {
-    // [JsonPropertyName("id")] public string? Id { get; set; }
     [JsonPropertyName("captcha")]
+    [JsonInclude]
     public string? Captcha { get; set; }
 }

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using NirvanaAPI.Utils.CodeTools;
+using Nirvana.Common.Utils.CodeTools;
+using Nirvana.WPFLauncher.Http;
 
 namespace Nirvana.WPFLauncher.Protocol;
 
@@ -23,24 +19,23 @@ public static class X19 {
     }
 
     /**
-     * @return 最新盒子的补丁信息
-     */
-    private static async Task<Dictionary<string, object>?> GetPatchVersionsAsync()
-    {
-        var str = await new HttpClient().GetAsync("https://x19.update.netease.com/pl/x19_java_patchlist");
-        var content = await str.Content.ReadAsStringAsync();
-        content = content[..content.LastIndexOf(',')];
-        content = content[(content.LastIndexOf('\n') + 1)..];
-        content = "{" + content + "}";
-        return JsonSerializer.Deserialize<Dictionary<string, object>>(content);
-    }
-
-    /**
      * @return 最新盒子版本号
      */
     private static string GetLatestVersion()
     {
-        var result = GetPatchVersionsAsync().GetAwaiter().GetResult();
-        return result?.Keys.Last() ?? throw new Exception("X19 versions is empty.");
+        var content = X19Extensions.UpdateNetease.Api<string>("https://x19.update.netease.com/pl/x19_java_patchlist");
+        ArgumentException.ThrowIfNullOrEmpty(content);
+
+        const string size = "\":{\"size\":";
+
+        var pos = content.LastIndexOf(size, StringComparison.Ordinal);
+        if (pos == -1) {
+            throw new ErrorCodeException(ErrorCode.NotVersionByLauncher);
+        }
+
+        content = content[..pos];
+        pos = content.LastIndexOf('\"');
+
+        return pos >= 0 ? content[(pos + 1)..] : throw new ErrorCodeException(ErrorCode.NotVersionByLauncher);
     }
 }

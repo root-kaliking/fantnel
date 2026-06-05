@@ -1,5 +1,11 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using Nirvana.Common;
+using Nirvana.Common.Entities;
+using Nirvana.Common.Entities.Nirvana;
+using Nirvana.Common.Manager;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Game.Launcher.Entities;
 using Nirvana.Game.Launcher.Services.Java;
 using Nirvana.Game.Launcher.Utils;
@@ -9,11 +15,6 @@ using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameLaunch.Texture;
 using Nirvana.WPFLauncher.Http;
 using Nirvana.WPFLauncher.Protocol;
 using Nirvana.WPFLauncher.Utils;
-using NirvanaAPI.Entities;
-using NirvanaAPI.Entities.Nirvana;
-using NirvanaAPI.Manager;
-using NirvanaAPI.Utils;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.Public.Message;
@@ -49,7 +50,7 @@ public static class LaunchMessage {
         ExEnvironment(gameVersion);
 
         // 服务器角色信息
-        var character = await RentalGameMessage.GetUserName(server.EntityId, name);
+        var character = await RentalGameMessage.GetUserNameAsync(server.EntityId, name);
         if (character == null) {
             throw new ErrorCodeException(ErrorCode.NotFoundName);
         }
@@ -131,7 +132,7 @@ public static class LaunchMessage {
 
     private static void ExEnvironment(EnumGameVersion gameVersion)
     {
-        ExEnvironmentByJava(gameVersion).Wait();
+        ExEnvironmentByJava(gameVersion).GetAwaiter().GetResult();
     }
 
     // 检测并自动安装java环境
@@ -157,7 +158,7 @@ public static class LaunchMessage {
         }
 
         var id = PublicProgram.Mode + "." + PublicProgram.Arch + "." + javaName + ".java";
-        var response = await X19Extensions.Nirvana.Api<EntityResponse<EntityMd5AndUrl>>("/api/fantnel/resource/md5?id=" + id);
+        var response = await X19Extensions.Nirvana.ApiAsync<EntityResponse<EntityMd5AndUrl>>("/api/fantnel/resource/md5?id=" + id);
         if (response?.Data == null) {
             throw new ErrorCodeException(ErrorCode.NotFound);
         }

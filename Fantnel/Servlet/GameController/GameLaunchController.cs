@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Manager;
 using Nirvana.Public.Message;
-using NirvanaAPI.Utils.CodeTools;
 
 namespace Fantnel.Servlet.GameController;
 
@@ -12,7 +12,7 @@ public class GameLaunchController : ControllerBase {
     [HttpGet("/api/gamelaunch/launch")]
     public IActionResult LaunchGame([FromQuery] string id, [FromQuery] string name, [FromQuery] string mode = "net")
     {
-        LaunchMessage.LaunchGame(id, name, mode).Wait();
+        LaunchMessage.LaunchGame(id, name, mode).GetAwaiter().GetResult();
         return Ok(Code.ToJson(ErrorCode.Success));
     }
 

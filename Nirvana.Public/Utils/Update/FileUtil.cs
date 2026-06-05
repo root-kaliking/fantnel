@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using NirvanaAPI.Utils;
+using Nirvana.Common.Utils;
 using Serilog;
 
 namespace Nirvana.Public.Utils.Update;

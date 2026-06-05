@@ -7,15 +7,15 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Nirvana.Cipher.Cipher.Nirvana;
 using Nirvana.Cipher.Cipher.Nirvana.Protocols;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.Progress;
 using Nirvana.Game.Launcher.Entities;
 using Nirvana.Game.Launcher.Services.Java.RPC;
 using Nirvana.Game.Launcher.Utils;
-using Nirvana.Game.Launcher.Utils.Progress;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameLaunch;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameLaunch.Texture;
 using Nirvana.WPFLauncher.Protocol;
 using Nirvana.WPFLauncher.Utils;
-using NirvanaAPI.Utils;
 using Serilog;
 
 namespace Nirvana.Game.Launcher.Services.Java;
@@ -35,7 +35,7 @@ public sealed class LauncherService : IDisposable {
     public LauncherService(EntityLaunchGame entityLaunchGame)
     {
         Entity = entityLaunchGame;
-        _skip32 = new Skip32Cipher((from c in "SaintSteve".ToCharArray() select (byte)c).ToArray());
+        _skip32 = new Skip32Cipher("SaintSteve".ToCharArray().Select(c => (byte)c).ToArray());
         _socketPort = Tools.GetUnusedPort(9876);
     }
 
@@ -107,8 +107,8 @@ public sealed class LauncherService : IDisposable {
         await PrepareMinecraftClientAsync(enumVersion);
         var workingDirectory = SetupGameRuntime();
         ApplyCoreMods(workingDirectory);
-        var (commandService, rpcPort) = InitializeLauncher(enumVersion, workingDirectory);
-        LaunchRpcService(enumVersion, rpcPort);
+        var commandService = InitializeLauncher(enumVersion, workingDirectory);
+        LaunchRpcService(enumVersion, commandService.RpcPort);
         StartAuthenticationService();
         await StartGameProcessAsync(commandService);
     }
@@ -148,16 +148,21 @@ public sealed class LauncherService : IDisposable {
         }
     }
 
-    private (CommandService commandService, int rpcPort) InitializeLauncher(EnumGameVersion enumVersion, string workingDirectory)
+    private CommandService InitializeLauncher(EnumGameVersion enumVersion, string workingDirectory)
     {
-        var commandService = new CommandService();
-        var availablePort = Tools.GetUnusedPort(11413);
-
         ArgumentNullException.ThrowIfNull(_skip32);
 
-        commandService.Init(enumVersion, Entity, workingDirectory, _skip32.GenerateRoleUuid(Entity.RoleName, Convert.ToUInt32(Entity.Account.GetUserId())), _socketPort, X19.GameVersion, availablePort);
+        var commandService = new CommandService {
+            GameVersion = enumVersion,
+            LauncherGame = Entity,
+            WorkPath = workingDirectory,
+            Uuid = _skip32.GenerateRoleUuid(Entity.RoleName, Convert.ToUInt32(Entity.Account.GetUserId())),
+            SocketPort = _socketPort,
+            ProtocolVersion = X19.GameVersion,
+            RpcPort = Tools.GetUnusedPort(11413)
+        };
 
-        return (commandService, availablePort);
+        return commandService.Init();
     }
 
     private void LaunchRpcService(EnumGameVersion gameVersion, int rpcPort)

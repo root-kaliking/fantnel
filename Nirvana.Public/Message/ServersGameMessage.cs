@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Manager;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameCharacters;
 using Nirvana.WPFLauncher.Protocol;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.Public.Message;

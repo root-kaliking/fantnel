@@ -4,9 +4,9 @@ using System.IO;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
-using Nirvana.Game.Launcher.Utils.Progress;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.Progress;
 using Nirvana.WPFLauncher.Http;
-using NirvanaAPI.Utils;
 using Serilog;
 using FileUtil = Nirvana.Public.Utils.Update.FileUtil;
 
@@ -22,7 +22,7 @@ public class EntityUpdate {
 
     private async Task<JsonArray?> Initialize()
     {
-        var jsonObj = await X19Extensions.Nirvana.Api<JsonObject>($"/api/fantnel/update/get?mode={Mode}");
+        var jsonObj = await X19Extensions.Nirvana.ApiAsync<JsonObject>($"/api/fantnel/update/get?mode={Mode}");
         if (jsonObj == null) {
             WriteLine("获取更新信息失败，请检查网络连接。");
             return null;
@@ -81,10 +81,7 @@ public class EntityUpdate {
      */
     private async Task<int> CheckUpdate(params string[] basePathList)
     {
-        // 下载插件 进度条 初始化
-        var progressBar = new SyncProgressBarUtil.ProgressBar();
-        // 下载插件 进度条 回调
-        var uiProgress = new SyncCallback<SyncProgressBarUtil.ProgressReport>(progressBar.Update);
+        var uiProgress = SyncCallback.Create();
         return await CheckUpdate(dp => {
             uiProgress.Report(new SyncProgressBarUtil.ProgressReport {
                 Percent = dp,

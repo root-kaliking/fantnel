@@ -17,18 +17,23 @@ public class RunningProxy : EntityProxyBase {
     }
 
     [JsonPropertyName("is_rental")]
+    [JsonInclude]
     public bool IsRental { get; init; }
 
     [JsonPropertyName("local_address")]
+    [JsonInclude]
     public string LocalAddress { get; init; }
 
     [JsonPropertyName("local_port")]
+    [JsonInclude]
     public int LocalPort { get; init; }
 
     [JsonPropertyName("nick_name")]
-    public string NickName { get; init; }
+    [JsonInclude]
+    private string NickName { get; init; }
 
     [JsonPropertyName("server_name")]
+    [JsonInclude]
     public string ServerName { get; init; }
 
     /**

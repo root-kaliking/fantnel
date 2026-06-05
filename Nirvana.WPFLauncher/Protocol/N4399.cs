@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -28,10 +27,11 @@ public static class N4399 {
 
         var request = new HttpRequestMessage(HttpMethod.Post, "https://ptlogin.4399.com/ptlogin/login.do?v=1");
         request.Headers.Add("Referer", "http://ptlogin.4399.com/ptlogin/loginFrame.do");
-        request.Content = new StringContent(parameters.BuildQuery(), Encoding.UTF8, "application/x-www-form-urlencoded");;
-        
+        request.Content = new StringContent(parameters.BuildQuery(), Encoding.UTF8, "application/x-www-form-urlencoded");
+        ;
+
         var loginResponse = await client.SendAsync(request);
-        
+
         var loginText = await loginResponse.Content.ReadAsStringAsync();
 
         // 找到错误信息
@@ -39,9 +39,9 @@ public static class N4399 {
         if (errText.Length > 0) {
             throw new Exception(errText);
         }
-        
+
         // client.DefaultRequestHeaders.Add("Cookie", loginResponse.Headers.GetValues("Set-Cookie"));
-        
+
         // 生成SAuth令牌
         var sAuthToken = await GenerateSAuthAsync(client);
         return sAuthToken;
@@ -118,7 +118,7 @@ public static class N4399 {
         if (!queryParams.Contains("sig")) {
             throw new Exception("登录状态检查失败");
         }
-        
+
         // 获取统一认证信息
         var uniAuth = await GetUniAuthAsync(queryParams, client);
 
@@ -142,7 +142,7 @@ public static class N4399 {
         queryStr.Add("time", queryParams.Get("time"));
         queryStr.Add("validateState", queryParams.Get("validateState"));
         queryStr.Add("username", queryParams.Get("username"));
-        
+
         var queryBuilder = new QueryBuilder();
         queryBuilder.Add("_", queryParams.Get("time"));
         queryBuilder.Add("queryStr", queryStr);

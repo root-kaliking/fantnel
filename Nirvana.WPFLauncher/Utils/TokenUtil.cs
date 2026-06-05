@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using NirvanaAPI.Manager;
+using Nirvana.Common.Manager;
 
 namespace Nirvana.WPFLauncher.Utils;
 

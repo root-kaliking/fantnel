@@ -1,16 +1,15 @@
 using System;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.Progress;
 using Nirvana.Game.Launcher.Utils;
-using Nirvana.Game.Launcher.Utils.Progress;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameLaunch;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameLaunch.GameMods;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameLaunch.Texture;
 using Nirvana.WPFLauncher.Protocol;
 using Nirvana.WPFLauncher.Utils;
-using NirvanaAPI.Utils;
 using Serilog;
 
 namespace Nirvana.Game.Launcher.Services.Java;
@@ -38,15 +37,14 @@ public static class InstallerService {
         await ProcessPackage(versionResult.CoreLibUrl, libZip, PathUtil.CachePath, libMd5File, versionResult.CoreLibMd5, versionName + " libraries");
         InstallCoreLibs(Path.Combine(PathUtil.CachePath, versionName + "_libs"), gameVersion);
     }
-    
+
     private static void InstallCoreLibs(string libPath, EnumGameVersion gameVersion)
-	{
-		var gameVersionFromEnum = GameVersionUtil.GetGameVersionFromEnum(gameVersion);
-		var fileList = Directory.GetFiles(libPath, "*", SearchOption.AllDirectories);
+    {
+        var gameVersionFromEnum = GameVersionUtil.GetGameVersionFromEnum(gameVersion);
+        var fileList = Directory.GetFiles(libPath, "*", SearchOption.AllDirectories);
         var javaList = Directory.GetFiles(Path.Combine(PathUtil.GameBaseMcPath, "libraries"), "*", SearchOption.AllDirectories);
-		foreach (var filePath in fileList)
-		{
-			var fileName = Path.GetFileName(filePath);
+        foreach (var filePath in fileList) {
+            var fileName = Path.GetFileName(filePath);
             if (!fileName.EndsWith(".jar")) {
                 var path = Path.Combine(PathUtil.GameBaseMcPath, "versions", gameVersionFromEnum, fileName);
                 Log.Information("Installed {0} to {1}", filePath, path);
@@ -64,13 +62,12 @@ public static class InstallerService {
                     break;
                 }
             }
-            
+
             if (flag) {
                 Log.Warning("Failed to install {0}", fileName);
             }
-            
         }
-	}
+    }
 
     private static async Task ProcessPackage(string url, string zipPath, string extractTo, string md5Path, string md5, string label)
     {
@@ -78,8 +75,8 @@ public static class InstallerService {
         if (File.Exists(md5Path) && await File.ReadAllTextAsync(md5Path) == md5) {
             return;
         }
-        var progress = new SyncProgressBarUtil.ProgressBar();
-        var uiProgress = new SyncCallback<SyncProgressBarUtil.ProgressReport>(progress.Update);
+
+        var uiProgress = SyncCallback.Create();
         await DownloadUtil.DownloadAsync(url, zipPath, label, uiProgress);
         await CompressionUtil.ExtractAsync(zipPath, extractTo, label, uiProgress);
         await File.WriteAllTextAsync(md5Path, md5);
@@ -98,8 +95,7 @@ public static class InstallerService {
         var entities = await NPFLauncher.GetGameCoreModDetailsListAsync(entity.IidList);
         var modList = new EntityModsList();
 
-        var progress = new SyncProgressBarUtil.ProgressBar();
-        var uiProgress = new SyncCallback<SyncProgressBarUtil.ProgressReport>(progress.Update);
+        var uiProgress = SyncCallback.Create();
 
         var corePath = Path.Combine(PathUtil.GameModsPath, gameId);
         var idx = 0;
@@ -137,6 +133,7 @@ public static class InstallerService {
                 if (Tools.IsReleaseVersion()) {
                     FileUtil.DeleteFileSafe(archive);
                 }
+
                 var array = FileUtil.EnumerateFiles(extractDir, "jar");
                 foreach (var t in array) {
                     FileUtil.CopyFileSafe(t, jar);
@@ -185,6 +182,7 @@ public static class InstallerService {
                 if (Tools.IsReleaseVersion()) {
                     FileUtil.DeleteFileSafe(compArchive);
                 }
+
                 var array2 = FileUtil.EnumerateFiles(Path.Combine(compDir, ".minecraft", "mods"), "jar");
                 var serverModsList = new EntityModsList();
                 foreach (var path in array2) {
@@ -221,26 +219,21 @@ public static class InstallerService {
         var path = Path.Combine(PathUtil.GamePath, "Runtime", gameId + "-" + roleName);
         var minecraft = Path.Combine(path, ".minecraft");
         var mods = Path.Combine(minecraft, "mods");
-        
+
         InstallCustomMods(mods, gameId); // 会创建mods目录
-        
+
         if (gameType == EnumGType.NetGame) {
             FileUtil.CleanDirectorySafe(mods);
             var sourceDir = Path.Combine(PathUtil.GamePath, gameId, ".minecraft");
             FileUtil.CopyDirectory(sourceDir, minecraft, true);
             // 因为 heypixel 的 protocol mod 会使用 win-jna, 所以无法使用
-            if ("4661334467366178884".Equals(gameId) && !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+            if ("4661334467366178884".Equals(gameId)) {
                 foreach (var filePath in FileUtil.GetFilesByDirectoryByFileSize(mods, 50_000_000, "*.jar")) {
                     FileUtil.DeleteFileSafe(filePath);
                 }
             }
         }
 
-        var linkPath = Path.Combine(minecraft, "assets");
-        var targetPath = Path.Combine(PathUtil.GameBaseMcPath, "assets");
-
-        // 创建assets目录符号链接
-        Tools.CreateSymbolicLink(linkPath, targetPath);
         return path;
     }
 

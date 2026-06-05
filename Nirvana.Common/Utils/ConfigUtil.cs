@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace NirvanaAPI.Utils;
+namespace Nirvana.Common.Utils;
 
 public static class ConfigUtil {
     // 获取配置

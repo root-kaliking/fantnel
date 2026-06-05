@@ -1,5 +1,7 @@
 ﻿using System;
 using Nirvana.Cipher.Cipher.Nirvana.Connection;
+using Nirvana.Common.Entities.Login;
+using Nirvana.Common.Manager;
 using Nirvana.Development;
 using Nirvana.DevPlugin.Entities;
 using Nirvana.Heypixel;
@@ -9,8 +11,6 @@ using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameCharacters;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameDetails;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.RentalGame;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.RentalGame.GameCharacters;
-using NirvanaAPI.Entities.Login;
-using NirvanaAPI.Manager;
 using Serilog;
 
 namespace Nirvana.Public.Manager;

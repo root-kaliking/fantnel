@@ -31,7 +31,7 @@ public static class RestartTools {
             AccountMessage.DisableDefaultLogin(); // 禁止默认登录
             AccountMessage.SwitchAccountToForce(accountId); // 强制切换账号
             InitProgram.NelInit1(args);
-            ProxiesMessage.StartProxyAsyncTo(id, name, port, proxyMode).Wait();
+            ProxiesMessage.StartProxyAsyncTo(id, name, port, proxyMode).GetAwaiter().GetResult();
             return false;
         }
 
@@ -61,7 +61,7 @@ public static class RestartTools {
         }
     }
 
-    private static string Get(string name, string[] args, string? defaultValue = "")
+    public static string Get(string name, string[] args, string? defaultValue = "")
     {
         return Get<string>(name, args, defaultValue);
     }

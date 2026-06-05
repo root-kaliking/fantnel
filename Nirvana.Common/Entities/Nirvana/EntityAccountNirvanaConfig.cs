@@ -1,14 +1,17 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NirvanaAPI.Entities.Nirvana;
+namespace Nirvana.Common.Entities.Nirvana;
 
 public class EntityAccountNirvanaConfig {
     [JsonPropertyName("account")]
+    [JsonInclude]
     public required string Account { get; set; }
 
     [JsonPropertyName("days")]
+    [JsonInclude]
     public required double Days { get; set; }
 
     [JsonPropertyName("hideAccount")]
-    public required bool HideAccount { get; set; }
+    [JsonInclude]
+    public required bool HideAccount { get; init; }
 }

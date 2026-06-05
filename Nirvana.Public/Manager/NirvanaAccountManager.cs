@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Nirvana.Common;
+using Nirvana.Common.Entities.Nirvana;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Entities.Nirvana;
 using Nirvana.WPFLauncher.Http;
-using NirvanaAPI;
-using NirvanaAPI.Entities.Nirvana;
-using NirvanaAPI.Utils.CodeTools;
 
 namespace Nirvana.Public.Manager;
 
@@ -14,7 +14,7 @@ public static class NirvanaAccountManager {
     // 登录账号
     public static async Task Login(string account, string password)
     {
-        var entity = await X19Extensions.Nirvana.Api<EntityNirvanaLogin>("/api/login?mode=fantnel&account=" + account + "&password=" + password);
+        var entity = await X19Extensions.Nirvana.ApiAsync<EntityNirvanaLogin>("/api/login?mode=fantnel&account=" + account + "&password=" + password);
         if (entity == null) {
             throw new Exception();
         }
@@ -41,7 +41,7 @@ public static class NirvanaAccountManager {
         NirvanaConfig.IsLogin(); // 检查是否登录
 
         if (_days == null) {
-            var entity = await X19Extensions.Nirvana.Api<EntityNirvanaInfo>("/api/info?mode=fantnel&" + NirvanaConfig.GetLoginT());
+            var entity = await X19Extensions.Nirvana.ApiAsync<EntityNirvanaInfo>("/api/info?mode=fantnel&" + NirvanaConfig.GetLoginT());
             if (entity == null) {
                 throw new Exception();
             }

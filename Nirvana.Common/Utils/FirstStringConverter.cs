@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace NirvanaAPI.Utils;
+namespace Nirvana.Common.Utils;
 
 public class FirstStringConverter : JsonConverter<string> {
     public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

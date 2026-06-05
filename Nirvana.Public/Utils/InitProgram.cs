@@ -5,15 +5,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nirvana.Cipher.Cipher.Nirvana.Connection;
 using Nirvana.Cipher.Yggdrasil;
+using Nirvana.Common;
+using Nirvana.Common.Entities;
+using Nirvana.Common.Manager;
+using Nirvana.Common.Utils;
 using Nirvana.Public.Manager;
 using Nirvana.Public.Message;
 using Nirvana.Public.Utils.Update;
 using Nirvana.WPFLauncher.Http;
 using Nirvana.WPFLauncher.Protocol;
-using NirvanaAPI;
-using NirvanaAPI.Entities;
-using NirvanaAPI.Manager;
-using NirvanaAPI.Utils;
 using Serilog;
 
 namespace Nirvana.Public.Utils;
@@ -26,7 +26,7 @@ public static class InitProgram {
 
         // 检查更新
         Log.Information("{0}", PathUtil.ResourcePath);
-        UpdateTools.CheckUpdate(args).Wait();
+        UpdateTools.CheckUpdate(args).GetAwaiter().GetResult();
 
         // 重置日志
         logInit.Invoke();
@@ -45,7 +45,7 @@ public static class InitProgram {
         VersionCheck();
 
         // 创建服务
-        CreateServices();
+        CreateServices(args);
         Log.Information("------  完成 ------");
 
         // 配置初始化
@@ -142,7 +142,7 @@ public static class InitProgram {
                         await Task.Delay(1000);
                     }
 
-                    await X19Extensions.Nirvana.Api<EntityResponse<string>>("/api/tick?mode=fantnel", new Dictionary<string, string> {
+                    await X19Extensions.Nirvana.ApiAsync<EntityResponse<string>>("/api/tick?mode=fantnel", new Dictionary<string, string> {
                         { "system", PublicProgram.Mode },
                         { "arch", PublicProgram.Arch },
                         { "version", PublicProgram.Version },
@@ -160,7 +160,7 @@ public static class InitProgram {
     {
         for (var i = 0; i < 3; i++) {
             try {
-                var entity = await X19Extensions.Nirvana.Api<EntityInfo>("/fantnel.json");
+                var entity = await X19Extensions.Nirvana.ApiAsync<EntityInfo>("/fantnel.json");
                 if (entity != null) {
                     InfoManager.FantnelInfo = entity;
                     return;
@@ -176,22 +176,25 @@ public static class InitProgram {
     }
 
     // 创建服务
-    private static void CreateServices()
+    private static void CreateServices(string[] args)
     {
-        if (InfoManager.FantnelInfo == null || string.IsNullOrEmpty(InfoManager.FantnelInfo.CrcSalt)) {
+        X19.CrcSalt = RestartTools.Get("crc_salt", args);
+        if (string.IsNullOrEmpty(X19.CrcSalt) && InfoManager.FantnelInfo != null) {
+            X19.CrcSalt = InfoManager.FantnelInfo.CrcSalt;
+        }
+
+        if (string.IsNullOrEmpty(X19.CrcSalt)) {
             Log.Error("CRC Salt 计算失败!");
             Thread.Sleep(6000);
             Environment.Exit(1);
             return;
         }
 
-        Log.Information("CRC Salt 当前版本: {0}", InfoManager.FantnelInfo.GameVersion);
-        Log.Information("CRC Salt 计算完成: {0}....", InfoManager.FantnelInfo.CrcSalt[..6]);
-        X19.CrcSalt = InfoManager.FantnelInfo.CrcSalt;
+        Log.Information("CRC Salt 计算完成: {0}....", X19.CrcSalt[..6]);
     }
 
     public static async Task<bool> SafeTheme(string themeValue)
     {
-        return await X19Extensions.Nirvana.Api<EntityResponseBase>("/api/theme/name?value=" + themeValue) is { Code: 1 };
+        return await X19Extensions.Nirvana.ApiAsync<EntityResponseBase>("/api/theme/name?value=" + themeValue) is { Code: 1 };
     }
 }

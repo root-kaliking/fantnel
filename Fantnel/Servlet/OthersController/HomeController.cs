@@ -1,11 +1,11 @@
 ﻿using System.IO;
 using Microsoft.AspNetCore.Mvc;
+using Nirvana.Common.Entities.Nirvana;
+using Nirvana.Common.Manager;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Entities.Update;
 using Nirvana.Public.Utils;
-using NirvanaAPI.Entities.Nirvana;
-using NirvanaAPI.Manager;
-using NirvanaAPI.Utils;
-using NirvanaAPI.Utils.CodeTools;
 
 namespace Fantnel.Servlet.OthersController;
 
@@ -53,7 +53,7 @@ public class HomeController : ControllerBase {
         new EntityUpdate {
             Mode = "ui." + entity.Value,
             Name = "Fantnel UI"
-        }.CheckUpdateSafe().Wait();
+        }.CheckUpdateSafe().GetAwaiter().GetResult();
 
         return Ok(Code.ToJson(ErrorCode.Success));
     }

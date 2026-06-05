@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using Nirvana.Common;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Manager;
-using NirvanaAPI;
-using NirvanaAPI.Utils.CodeTools;
 
 namespace Fantnel.Servlet.OthersController;
 
@@ -13,7 +13,7 @@ public class NirvanaController : ControllerBase {
     [HttpGet("/api/nirvana/login")]
     public IActionResult Login(string account, string password)
     {
-        NirvanaAccountManager.Login(account, password).Wait();
+        NirvanaAccountManager.Login(account, password).GetAwaiter().GetResult();
         return Ok(Code.ToJson(ErrorCode.Success));
     }
 

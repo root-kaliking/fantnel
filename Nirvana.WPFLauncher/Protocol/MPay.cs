@@ -1,13 +1,12 @@
 using System;
-using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Nirvana.Common;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.WPFLauncher.Entities.MPay;
 using Nirvana.WPFLauncher.Http;
 using Nirvana.WPFLauncher.Utils;
-using NirvanaAPI;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.WPFLauncher.Protocol;
@@ -98,6 +97,7 @@ public class MPay : IDisposable {
             if (entityVerifyResponse is null) {
                 throw new Exception("Failed to login with email, response: " + text);
             }
+
             throw new ErrorCodeException(entityVerifyResponse) {
                 Entity = {
                     Code = entityVerifyResponse.Code,

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Serilog;
 
-namespace NirvanaAPI.Utils;
+namespace Nirvana.Common.Utils;
 
 public static class FileUtil {
     public static string[] EnumerateFiles(string path, string? fileType = null)
@@ -22,10 +21,10 @@ public static class FileUtil {
     }
 
     /**
-    * 计算文件的MD5哈希值
-    * @param filePath 文件绝对路径
-    * @return 文件的MD5哈希值（小写）
-    */
+     * 计算文件的MD5哈希值
+     * @param filePath 文件绝对路径
+     * @return 文件的MD5哈希值（小写）
+     */
     public static string ComputeMd5FromFile(string path)
     {
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) {
@@ -96,26 +95,23 @@ public static class FileUtil {
             return false;
         }
     }
-    
+
     public static void CopyDirectory(string sourceDir, string destDir, bool overwrite = false)
     {
-
         // 创建目标目录
         Directory.CreateDirectory(sourceDir); // 防止源目录不存在导致异常
         Directory.CreateDirectory(destDir); // 防止目标目录不存在导致异常
-        
+
         var dir = new DirectoryInfo(sourceDir);
 
         // 复制所有文件
-        foreach (var file in dir.GetFiles())
-        {
+        foreach (var file in dir.GetFiles()) {
             var targetFile = Path.Combine(destDir, file.Name);
             file.CopyTo(targetFile, overwrite);
         }
 
         // 递归复制所有子目录
-        foreach (var subDir in dir.GetDirectories())
-        {
+        foreach (var subDir in dir.GetDirectories()) {
             var targetSubDir = Path.Combine(destDir, subDir.Name);
             CopyDirectory(subDir.FullName, targetSubDir, overwrite);
         }

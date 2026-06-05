@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using NirvanaAPI.Manager;
+using Nirvana.Common.Manager;
 
-namespace NirvanaAPI.Entities;
+namespace Nirvana.Common.Entities;
 
 // ReSharper disable once InconsistentNaming
 public class EntityWPFResponse {

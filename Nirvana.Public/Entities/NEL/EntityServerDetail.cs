@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Threading;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Manager;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameDetails;
 using Nirvana.WPFLauncher.Protocol;
-using NirvanaAPI.Utils.CodeTools;
 
 namespace Nirvana.Public.Entities.NEL;
 
@@ -54,27 +54,35 @@ public class EntityServerDetail {
     }
 
     [JsonPropertyName("id")]
+    [JsonInclude]
     public string? Id { get; set; }
 
     [JsonPropertyName("name")]
+    [JsonInclude]
     public string? Name { get; set; }
 
     [JsonPropertyName("author")]
+    [JsonInclude]
     public string? Author { get; set; }
 
     [JsonPropertyName("createdAt")]
+    [JsonInclude]
     public string? CreatedAt { get; set; }
 
     [JsonPropertyName("gameVersion")]
+    [JsonInclude]
     public string? GameVersion { get; set; }
 
     [JsonPropertyName("address")]
+    [JsonInclude]
     public string? Address { get; set; }
 
     [JsonPropertyName("fullDescription")]
+    [JsonInclude]
     public string? FullDescription { get; set; }
 
     [JsonPropertyName("brief_image_urls")]
+    [JsonInclude]
     public string[]? BriefImageUrls { get; set; }
 
     private void Set(EntityQueryNetGameDetailItem? data)

@@ -11,10 +11,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using NirvanaAPI.Utils.CodeTools;
+using Microsoft.VisualBasic.FileIO;
+using Nirvana.Common.Utils.CodeTools;
 using Serilog;
 
-namespace NirvanaAPI.Utils;
+namespace Nirvana.Common.Utils;
 
 public static class Tools {
     private static bool _isDebugMode;
@@ -88,7 +89,7 @@ public static class Tools {
 
         return exception.Message;
     }
-   
+
     /**
      * 同步计算文件的SHA256哈希值
      * @param filePath 文件路径
@@ -100,8 +101,9 @@ public static class Tools {
             throw new ArgumentException("文件路径不能为空", nameof(filePath));
         }
 
-        if (!File.Exists(filePath))
+        if (!File.Exists(filePath)) {
             throw new FileNotFoundException($"文件不存在: {filePath}");
+        }
 
         using var sha256 = SHA256.Create();
         using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
@@ -161,8 +163,14 @@ public static class Tools {
      */
     public static string DetectOperatingSystemMode()
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return "win";
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "linux";
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+            return "win";
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+            return "linux";
+        }
+
         return RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "mac" : "win";
     }
 
@@ -245,9 +253,9 @@ public static class Tools {
         }
     }
 
-    public static void CreateSymbolicLink(string linkPath, string targetPath)
+    public static void CreateLinkDirectory(string linkPath, string targetPath)
     {
-        Log.Warning("{0} -> {1}", targetPath, linkPath);
+        Log.Warning("[符号链接]: {0} -> {1}", targetPath, linkPath);
 
         // 安全判断：这个路径是不是 符号链接
         if (IsSymbolicLink(linkPath)) {
@@ -258,8 +266,22 @@ public static class Tools {
             Directory.Delete(linkPath, true);
         }
 
-        // 创建新的软链接
-        Directory.CreateSymbolicLink(linkPath, targetPath);
+        try {
+            // 创建新的软链接
+            Directory.CreateSymbolicLink(linkPath, targetPath);
+            return;
+        } catch (Exception e) {
+            Log.Error("[符号链接]链接失败: {0}\n{1}", linkPath, e.Message);
+        }
+
+        try {
+            Directory.CreateDirectory(linkPath);
+            Directory.CreateDirectory(targetPath);
+            FileSystem.CopyDirectory(targetPath, linkPath);
+        } catch (Exception copyEx) {
+            Log.Error("[符号链接]:复制目录失败: {0}\n{1}", linkPath, copyEx.Message);
+            throw;
+        }
     }
 
     // 判断是否为符号链接

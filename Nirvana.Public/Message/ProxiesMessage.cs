@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Game.Launcher.Services.Java;
 using Nirvana.Game.Launcher.Utils;
 using Nirvana.Public.Entities.NEL;
 using Nirvana.Public.Manager;
 using Nirvana.WPFLauncher.Protocol;
-using NirvanaAPI.Utils;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.Public.Message;
@@ -105,8 +105,10 @@ public static class ProxiesMessage {
             var mods = JsonSerializer.Serialize(serverModInfo);
 
             // 服务器角色信息
-            var character = await RentalGameMessage.GetUserName(server.EntityId, name);
-            if (character == null) throw new ErrorCodeException(ErrorCode.NotFoundName);
+            var character = await RentalGameMessage.GetUserNameAsync(server.EntityId, name);
+            if (character == null) {
+                throw new ErrorCodeException(ErrorCode.NotFoundName);
+            }
 
             // 前往游戏页 并 前往启动游戏页
             _ = InterConn.LoginStartAndGameStart(server.EntityId);

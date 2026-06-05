@@ -100,7 +100,7 @@ public static class StandardYggdrasil {
 
     private static async Task<YggdrasilServer[]> RandomAuthServer()
     {
-        var servers = await X19Extensions.UpdateNetease.Api<YggdrasilServer[]>("/authserver.list");
+        var servers = await X19Extensions.UpdateNetease.ApiAsync<YggdrasilServer[]>("/authserver.list");
 
         if (servers == null || servers.Length == 0) {
             throw new Exception("Not StandardYggdrasil Servers Found.");

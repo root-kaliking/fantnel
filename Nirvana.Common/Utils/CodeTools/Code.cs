@@ -1,6 +1,6 @@
-using NirvanaAPI.Entities;
+using Nirvana.Common.Entities;
 
-namespace NirvanaAPI.Utils.CodeTools;
+namespace Nirvana.Common.Utils.CodeTools;
 
 public static class Code {
     public static EntityResponse<object> ToJson(ErrorCode code, object? data = null)
@@ -52,6 +52,7 @@ public static class Code {
             ErrorCode.VerifyFailed => "验证失败",
             ErrorCode.OnlineStatusExpired => "在线状态已过期",
             ErrorCode.NoTimes => "没有获取次数，请前往 \"官网\" 进行购买！",
+            ErrorCode.NotVersionByLauncher => "无法获取盒子版本",
             _ => "未知错误"
         };
     }

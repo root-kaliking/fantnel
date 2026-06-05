@@ -44,12 +44,15 @@ public class MgbSdk(string gameId) : IDisposable {
         if (dictionary == null) {
             throw new HttpRequestException("Response is empty");
         }
+
         if ("200".Equals(dictionary["code"].ToString())) {
             return;
         }
+
         if (dictionary.TryGetValue("msg", out var msg)) {
             throw new HttpRequestException(msg.ToString());
         }
+
         throw new HttpRequestException(dictionary["status"].ToString());
     }
 }

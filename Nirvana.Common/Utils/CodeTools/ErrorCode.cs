@@ -1,4 +1,4 @@
-﻿namespace NirvanaAPI.Utils.CodeTools;
+﻿namespace Nirvana.Common.Utils.CodeTools;
 
 public enum ErrorCode {
     Failure = 0,
@@ -33,5 +33,6 @@ public enum ErrorCode {
     ParamError = 29,
     VerifyFailed = 30,
     OnlineStatusExpired = 31,
-    NoTimes = 32
+    NoTimes = 32,
+    NotVersionByLauncher = 33
 }

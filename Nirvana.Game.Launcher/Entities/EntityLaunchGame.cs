@@ -1,45 +1,57 @@
 using System.Text.Json.Serialization;
+using Nirvana.Common.Entities.Login;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.Minecraft;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameLaunch.Texture;
-using NirvanaAPI.Entities.Login;
 
 namespace Nirvana.Game.Launcher.Entities;
 
 public class EntityLaunchGame {
     [JsonPropertyName("game_name")]
+    [JsonInclude]
     public string GameName { get; set; } = string.Empty;
 
     [JsonPropertyName("game_id")]
+    [JsonInclude]
     public string GameId { get; init; } = string.Empty;
 
     [JsonPropertyName("role_name")]
+    [JsonInclude]
     public string RoleName { get; init; } = string.Empty;
 
     [JsonPropertyName("client_type")]
+    [JsonInclude]
     public EnumGameClientType ClientType { get; set; }
 
     [JsonPropertyName("game_type")]
+    [JsonInclude]
     public EnumGType GameType { get; init; }
 
     [JsonPropertyName("game_version_id")]
+    [JsonInclude]
     public int GameVersionId { get; init; }
 
     [JsonPropertyName("game_version")]
+    [JsonInclude]
     public string GameVersion { get; init; } = string.Empty;
 
     [JsonPropertyName("account")]
+    [JsonInclude]
     public required EntityUserInfo Account { get; init; }
 
     [JsonPropertyName("server_ip")]
+    [JsonInclude]
     public string ServerIp { get; init; } = string.Empty;
 
     [JsonPropertyName("server_port")]
+    [JsonInclude]
     public int ServerPort { get; init; }
 
     [JsonPropertyName("load_core_mods")]
+    [JsonInclude]
     public bool LoadCoreMods { get; init; }
 
     [JsonPropertyName("id")]
+    [JsonInclude]
     public required int Id { get; set; }
 
     /**

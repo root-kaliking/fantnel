@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Nirvana.Cipher.Cipher.Nirvana.Connection;
-using NirvanaAPI.Entities.Login;
+using Nirvana.Common.Entities.Login;
 using Serilog;
 
 namespace Nirvana.Cipher.Cipher.Nirvana.Protocols;

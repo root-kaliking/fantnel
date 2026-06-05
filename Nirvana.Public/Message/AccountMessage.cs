@@ -6,18 +6,18 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Nirvana.Common;
+using Nirvana.Common.Entities;
+using Nirvana.Common.Entities.Login;
+using Nirvana.Common.Manager;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Entities.Nirvana;
 using Nirvana.Public.Manager;
 using Nirvana.WPFLauncher.Entities.MPay;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.Login;
 using Nirvana.WPFLauncher.Http;
 using Nirvana.WPFLauncher.Protocol;
-using NirvanaAPI;
-using NirvanaAPI.Entities;
-using NirvanaAPI.Entities.Login;
-using NirvanaAPI.Manager;
-using NirvanaAPI.Utils;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.Public.Message;
@@ -43,7 +43,7 @@ public static class AccountMessage {
     {
         lock (GameSaveAccountLock) {
             var captchaId = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
-            Captcha4399Bytes = X19Extensions.Pt4399.ApiRawB("/ptlogin/captcha.do?captchaId=" + captchaId).GetAwaiter().GetResult();
+            Captcha4399Bytes = X19Extensions.Pt4399.ApiRawB("/ptlogin/captcha.do?captchaId=" + captchaId);
             _session4399Id = captchaId;
         }
     }
@@ -419,7 +419,7 @@ public static class AccountMessage {
 
     public static async Task RandomAccount(EntityGeeTest captcha)
     {
-        var randomAccount = await X19Extensions.Nirvana.Api<string>("/api/nac4399?mode=get&" + NirvanaConfig.GetLoginT() + "&" + captcha.Get());
+        var randomAccount = await X19Extensions.Nirvana.ApiAsync<string>("/api/nac4399?mode=get&" + NirvanaConfig.GetLoginT() + "&" + captcha.Get());
         if (randomAccount == null) {
             throw new ErrorCodeException(ErrorCode.Failure);
         }

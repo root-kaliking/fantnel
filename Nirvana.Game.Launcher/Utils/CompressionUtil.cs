@@ -5,8 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Nirvana.Game.Launcher.Utils.Progress;
-using NirvanaAPI.Utils;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.Progress;
 using Serilog;
 using SharpCompress.Archives;
 using SharpCompress.Common;
@@ -60,13 +60,7 @@ public static class CompressionUtil {
 
     public static async Task ExtractAsync(string archivePath, string outPath, string name, SyncCallback<SyncProgressBarUtil.ProgressReport>? progress = null)
     {
-        var uiProgress = progress;
-        if (uiProgress == null) {
-            // 解压 进度条 初始化
-            var progressBar = new SyncProgressBarUtil.ProgressBar();
-            // 解压 进度条 回调
-            uiProgress = new SyncCallback<SyncProgressBarUtil.ProgressReport>(progressBar.Update);
-        }
+        var uiProgress = SyncCallback.Create(progress);
 
         await ExtractAsync(archivePath, outPath, dp => {
             uiProgress.Report(new SyncProgressBarUtil.ProgressReport {

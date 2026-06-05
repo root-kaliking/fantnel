@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Threading;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Manager;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.RentalGame;
 using Nirvana.WPFLauncher.Protocol;
-using NirvanaAPI.Utils.CodeTools;
 
 namespace Nirvana.Public.Entities.NEL;
 
@@ -53,30 +53,39 @@ public class EntityRentalDetail {
     }
 
     [JsonPropertyName("id")]
+    [JsonInclude]
     public string? Id { get; set; }
 
     [JsonPropertyName("name")]
+    [JsonInclude]
     public string? Name { get; set; }
 
     [JsonPropertyName("mc_version")]
+    [JsonInclude]
     public string? McVersion { get; set; }
 
     [JsonPropertyName("image_url")]
+    [JsonInclude]
     public string? ImageUrl { get; set; }
 
     [JsonPropertyName("player_count")]
+    [JsonInclude]
     public uint PlayerCount { get; set; }
 
     [JsonPropertyName("capacity")]
+    [JsonInclude]
     public uint Capacity { get; set; }
 
     [JsonPropertyName("brief_summary")]
+    [JsonInclude]
     public string? BriefSummary { get; set; }
 
     [JsonPropertyName("address")]
+    [JsonInclude]
     public string? Address { get; set; }
 
     [JsonPropertyName("server_type")]
+    [JsonInclude]
     public string? ServerType { get; set; }
 
     private void Set(EntityRentalGameDetails entity)

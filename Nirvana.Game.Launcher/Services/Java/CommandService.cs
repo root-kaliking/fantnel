@@ -8,6 +8,8 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Nirvana.Common;
+using Nirvana.Common.Utils;
 using Nirvana.Game.Launcher.Entities;
 using Nirvana.Game.Launcher.Utils;
 using Nirvana.WPFLauncher.Entities.WPFLauncher.Launch;
@@ -15,8 +17,6 @@ using Nirvana.WPFLauncher.Entities.WPFLauncher.NetGame.GameLaunch.Texture;
 using Nirvana.WPFLauncher.Http;
 using Nirvana.WPFLauncher.Utils;
 using Nirvana.WPFLauncher.Utils.Cipher;
-using NirvanaAPI;
-using NirvanaAPI.Utils;
 using Serilog;
 using TokenUtil = Nirvana.WPFLauncher.Utils.Cipher.TokenUtil;
 
@@ -27,77 +27,71 @@ public class CommandService {
         AllowTrailingCommas = true
     };
 
-    private readonly JsonSerializerOptions _options = new() {
+    private static readonly JsonSerializerOptions Options1 = new() {
         // 关键设置：使用不转义的编码器
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
+    private readonly List<EntityJavaFile> _minecraft = []; // path, url
+    private readonly string _version;
+    private readonly string _versionPath;
+
     private string _cmd = "";
+    private string _nativesPath = string.Empty;
+    public required EnumGameVersion GameVersion;
+    public required EntityLaunchGame LauncherGame;
+    public required string ProtocolVersion;
+    public required int RpcPort = 11413;
+    public required int SocketPort;
+    public required string Uuid;
+    public required string WorkPath;
 
-    private EnumGameVersion _gameVersion;
-
-    private EntityLaunchGame? _launcherGame;
-
-    private List<EntityJavaFile> _minecraft = []; // path, url
-
-    private string _protocolVersion = "";
-
-    private int _rpcPort = 11413;
-
-    private string _uuid = "";
-
-    private string _version = "";
-
-    private string _workPath = "";
-    
-    private string _nativesPath = "";
-
-    public void Init(EnumGameVersion gameVersion, EntityLaunchGame entity, string workPath, string uuid, int socketPort, string protocolVersion = "", int rpcPort = 11413)
+    public CommandService()
     {
-        _launcherGame = entity;
-        _version = GameVersionUtil.GetGameVersionFromEnum(gameVersion);
-        _gameVersion = gameVersion;
-        _rpcPort = rpcPort;
-        _uuid = uuid;
-        _workPath = workPath;
-        _protocolVersion = protocolVersion;
+        _version = GameVersionUtil.GetGameVersionFromEnum(GameVersion);
+        _versionPath = Path.Combine(PathUtil.GameBaseMcPath, "versions", _version);
 
         // windows 不需要修复 lwjgl
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
             // 获取原版信息
-            var minecraft = X19Extensions.Bmcl.Api<Dictionary<string, JsonElement>>($"/version/{_version}/json").GetAwaiter().GetResult();
+            var minecraft = X19Extensions.Bmcl.Api<Dictionary<string, JsonElement>>($"/version/{_version}/json");
             if (minecraft != null) {
                 _minecraft = BuildJarListBase(minecraft);
             } else {
                 Log.Error("BmclApi returned null, version: {0}", _version);
             }
         }
+    }
 
-        var path = Path.Combine(PathUtil.GameBaseMcPath, "versions", _version, _version + ".json");
-        if (!File.Exists(path)) {
+    public CommandService Init()
+    {
+        var versionJson = Path.Combine(_versionPath, _version + ".json");
+        if (!File.Exists(versionJson)) {
             throw new Exception("Game version JSON not found, please go to Setting to fix the game file and try again.");
         }
 
-        var cfg = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(options: Options, json: File.ReadAllText(path));
+        var cfg = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(options: Options, json: File.ReadAllText(versionJson));
 
         if (cfg == null) {
             throw new Exception("Game version JSON deserialize failed.");
         }
 
-        BuildCommand(cfg, _version, socketPort);
+        BuildCommand(cfg, _version, SocketPort);
         // 修复 natives
-        InstallNatives().Wait();
+        InstallNatives().GetAwaiter().GetResult();
         // 安装 验证库
         InstallNativeDll();
 
         // 保存到文件，方便调试
         var scriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "command" + PathUtil.ScriptSuffix);
-        Tools.SaveShellScript(scriptPath, GetJavaCommand()).Wait();
+        Tools.SaveShellScript(scriptPath, GetJavaCommand()).GetAwaiter().GetResult();
 
-        var optionsPath = Path.Combine(_workPath, "options.txt");
+        var optionsPath = Path.Combine(WorkPath, "options.txt");
         if (!File.Exists(optionsPath)) {
             File.WriteAllText(optionsPath, "guiScale:2\nlang:zh_cn\nmaxFps:120\n");
         }
+
+        return this;
     }
 
     private async Task InstallNatives()
@@ -118,7 +112,6 @@ public class CommandService {
                 await CompressionUtil.ExtractAsync(item.GetPath(), _nativesPath);
             }
         }
-        
     }
 
     private void InstallNativeDll()
@@ -135,16 +128,16 @@ public class CommandService {
     // 生成启动参数 【独立运行】
     private string GetJavaCommand()
     {
-        return "cd \"" + _workPath + "\"" + "\n" + GetJavaPath(_gameVersion) + _cmd;
+        return "cd \"" + WorkPath + "\"" + "\n" + GetJavaPath(GameVersion) + _cmd;
     }
 
     public Process? StartGame()
     {
-        var javaPath = GetJavaPath(_gameVersion);
+        var javaPath = GetJavaPath(GameVersion);
         FileUtil.SetUnixFilePermissions(javaPath); // 添加 Java 权限
         return Process.Start(new ProcessStartInfo(javaPath, _cmd) {
             UseShellExecute = false,
-            WorkingDirectory = _workPath
+            WorkingDirectory = WorkPath
         });
     }
 
@@ -367,7 +360,7 @@ public class CommandService {
         var classPaths = BuildJarLists(cfg, _version);
 
         var nativesPath = Path.Combine("versions", _version, "natives");
-        
+
         if (!string.IsNullOrEmpty(jvmArguments)) {
             // 修复 linux/mac 冲突
             nativesPath = GameArgumentsUtil.GetArguments("java.library.path", jvmArguments, false, CommandMode.Mode5, CommandMode.Mode6);
@@ -419,12 +412,8 @@ public class CommandService {
         jvmArguments = GameArgumentsUtil.UpdateArguments("libraryDirectory", Path.Combine(PathUtil.GameBaseMcPath, "libraries"), jvmArguments, CommandMode.Mode5, CommandMode.Mode6);
         jvmArguments = GameArgumentsUtil.DeleteArguments("Xmx", jvmArguments, CommandMode.Mode14);
 
-        if (_launcherGame == null) {
-            throw new Exception("No Launcher Game Found");
-        }
-
         // 添加 验证信息
-        var stringBuilder = new StringBuilder().Append(" -Xmx").Append(NirvanaConfig.GetValue<int>("gameMemory")).Append("M ").Append(NirvanaConfig.GetValue<string>("jvmArgs")).Append($" -DlauncherControlPort={socketPort}").Append($" -DlauncherGameId={_launcherGame.GameId}").Append($" -DuserId={_launcherGame.Account.GetUserId()}").Append($" -DToken={TokenUtil.GenerateEncryptToken(_launcherGame.Account.GetToken())}").Append(" -DServer=RELEASE").Append(AddNativePath(nativesPath));
+        var stringBuilder = new StringBuilder().Append(" -Xmx").Append(NirvanaConfig.GetValue<int>("gameMemory")).Append("M ").Append(NirvanaConfig.GetValue<string>("jvmArgs")).Append($" -DlauncherControlPort={socketPort}").Append($" -DlauncherGameId={LauncherGame.GameId}").Append($" -DuserId={LauncherGame.Account.GetUserId()}").Append($" -DToken={TokenUtil.GenerateEncryptToken(LauncherGame.Account.GetToken())}").Append(" -DServer=RELEASE").Append(AddNativePath(nativesPath));
 
         jvmArguments = GameArgumentsUtil.AddArguments(stringBuilder.ToString(), jvmArguments); // 添加 修复参数
 
@@ -446,19 +435,19 @@ public class CommandService {
         minecraftArguments = GameArgumentsUtil.UpdateArguments("gameDir", "${game_directory}", minecraftArguments, CommandMode.Mode2, CommandMode.Mode3); // 修复错误内置
         minecraftArguments = GameArgumentsUtil.UpdateArguments("assetsDir", "${assets_root}", minecraftArguments, CommandMode.Mode2, CommandMode.Mode3); // 修复错误内置
 
-        minecraftArguments = minecraftArguments.Replace("${game_directory}", _workPath);
+        minecraftArguments = minecraftArguments.Replace("${game_directory}", WorkPath);
         minecraftArguments = minecraftArguments.Replace("--userType ${user_type}", string.Empty);
         minecraftArguments = minecraftArguments.Replace("${version_name}", version);
-        minecraftArguments = minecraftArguments.Replace("${auth_player_name}", _launcherGame.RoleName);
-        minecraftArguments = minecraftArguments.Replace("${auth_uuid}", _uuid);
+        minecraftArguments = minecraftArguments.Replace("${auth_player_name}", LauncherGame.RoleName);
+        minecraftArguments = minecraftArguments.Replace("${auth_uuid}", Uuid);
         minecraftArguments = minecraftArguments.Replace("--versionType ${version_type}", string.Empty);
         minecraftArguments = minecraftArguments.Replace("${assets_root}", Path.Combine(PathUtil.GameBaseMcPath, "assets"));
         minecraftArguments = minecraftArguments.Replace("${assets_index_name}", version);
 
-        minecraftArguments = minecraftArguments.Replace("${auth_access_token}", _gameVersion >= EnumGameVersion.V_1_18 ? "0" : RandomUtil.GetRandomString(32, "ABCDEF0123456789"));
+        minecraftArguments = minecraftArguments.Replace("${auth_access_token}", GameVersion >= EnumGameVersion.V_1_18 ? "0" : RandomUtil.GetRandomString(32, "ABCDEF0123456789"));
 
-        minecraftArguments = GameArgumentsUtil.UpdateArguments("server", _launcherGame.ServerIp, minecraftArguments, CommandMode.Mode3, CommandMode.Mode13);
-        minecraftArguments = GameArgumentsUtil.UpdateArguments("port", _launcherGame.ServerPort.ToString(), minecraftArguments, CommandMode.Mode3, CommandMode.Mode13);
+        minecraftArguments = GameArgumentsUtil.UpdateArguments("server", LauncherGame.ServerIp, minecraftArguments, CommandMode.Mode3, CommandMode.Mode13);
+        minecraftArguments = GameArgumentsUtil.UpdateArguments("port", LauncherGame.ServerPort.ToString(), minecraftArguments, CommandMode.Mode3, CommandMode.Mode13);
 
         minecraftArguments = GameArgumentsUtil.UpdateArguments("userProperties", GetUserProperties(version), minecraftArguments, CommandMode.Mode3, CommandMode.Mode13);
         minecraftArguments = GameArgumentsUtil.UpdateArguments("userPropertiesEx", GetUserPropertiesEx(), minecraftArguments, CommandMode.Mode3, CommandMode.Mode13);
@@ -534,7 +523,7 @@ public class CommandService {
     private string BuildCommandExFix()
     {
         var stringBuilder = new StringBuilder();
-        if (_gameVersion > EnumGameVersion.V_1_12_2) {
+        if (GameVersion > EnumGameVersion.V_1_12_2) {
             // Mac 高版本修复
             stringBuilder.Append("-XstartOnFirstThread ");
         }
@@ -546,12 +535,12 @@ public class CommandService {
     {
         var natives = Path.Combine(PathUtil.GameBaseMcPath, nativesPath);
         _nativesPath = natives;
-        
+
         // 避免 linux 出现权限问题
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
             var linkPath = "/tmp/fantnel-natives-" + _version;
             // 创建 natives 目录符号链。
-            Tools.CreateSymbolicLink(linkPath, natives);
+            Tools.CreateLinkDirectory(linkPath, natives);
             natives = linkPath;
         }
 
@@ -566,23 +555,23 @@ public class CommandService {
             Channel = "netease",
             TimeDelta = 0,
             IsFilter = true,
-            LauncherVersion = _protocolVersion
+            LauncherVersion = ProtocolVersion
         });
 
         // 引号 转换成 \"
-        return JsonSerializer.Serialize(jsonContent, _options);
+        return JsonSerializer.Serialize(jsonContent, Options1);
     }
 
     private string GetUserProperties(string version)
     {
-        if (_launcherGame == null) {
+        if (LauncherGame == null) {
             throw new Exception("No Launcher Game Found");
         }
 
         var format = version == "1.7.10" ? "\"uid\":[{0}],\"gameid\":[{1}],\"launcherport\":[{2}],\\\"filterkey\\\":[\\\"{3}\\\",\\\"0\\\"],\\\"filterpath\\\":[\\\"\\\",\\\"0\\\"],\\\"timedelta\\\":[0,0],\\\"launchversion\\\":[\\\"{3}\\\",\\\"0\\\"]" : "\\\"uid\\\":[{0},0],\\\"gameid\\\":[{1},0],\\\"launcherport\\\":[{2},0],\\\"filterkey\\\":[\\\"{3}\\\",\\\"0\\\"],\\\"filterpath\\\":[\\\"\\\",\\\"0\\\"],\\\"timedelta\\\":[0,0],\\\"launchversion\\\":[\\\"{4}\\\",\\\"0\\\"]";
         var args = new List<object> {
-            _launcherGame.Account.GetUserId(), 0, _rpcPort, RandomUtil.GetRandomString(32, "abcdefghijklmnopqrstuvwxyz"),
-            _protocolVersion
+            LauncherGame.Account.GetUserId(), 0, RpcPort, RandomUtil.GetRandomString(32, "abcdefghijklmnopqrstuvwxyz"),
+            ProtocolVersion
         };
         var text = string.Format(format, args.ToArray());
         return "\"{" + text + "}\"";

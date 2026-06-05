@@ -3,6 +3,7 @@ using DotNetty.Buffers;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
+using Nirvana.Common.Entities.Login;
 using Nirvana.Development.Analysis;
 using Nirvana.Development.Handlers;
 using Nirvana.Development.Manager;
@@ -10,7 +11,6 @@ using Nirvana.Development.Utils;
 using Nirvana.DevPlugin.Entities;
 using Nirvana.DevPlugin.Enums;
 using Nirvana.DevPlugin.Events.Event;
-using NirvanaAPI.Entities.Login;
 using Serilog;
 
 namespace Nirvana.Development;

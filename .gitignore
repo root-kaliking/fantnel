@@ -7,6 +7,9 @@
 /Nirvana.Cipher/bin/
 /Nirvana.Cipher/obj/
 
+/Nirvana.Common/bin/
+/Nirvana.Common/obj/
+
 /Nirvana.Development/bin/
 /Nirvana.Development/obj/
 
@@ -27,6 +30,3 @@
 
 /Nirvana.WPFLauncher/bin/
 /Nirvana.WPFLauncher/obj/
-
-/NirvanaAPI/bin/
-/NirvanaAPI/obj/

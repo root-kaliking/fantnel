@@ -8,10 +8,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using Nirvana.Public;
+using Nirvana.Common;
+using Nirvana.Common.Utils;
 using Nirvana.Public.Utils;
 using Nirvana.Public.Utils.ViewLogger;
-using NirvanaAPI.Utils;
 using Serilog;
 
 namespace Fantnel;
@@ -25,7 +25,7 @@ public static class Program {
         LogoInit(); // 初始化日志
 
         // Fantnel 服务器信息 初始化
-        InitProgram.FantnelInit().Wait();
+        InitProgram.FantnelInit().GetAwaiter().GetResult();
         // 检查更新
         InitProgram.CheckUpdate(args, LogoInit);
 

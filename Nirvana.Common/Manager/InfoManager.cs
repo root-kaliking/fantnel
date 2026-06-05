@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using NirvanaAPI.Entities;
-using NirvanaAPI.Entities.Login;
-using NirvanaAPI.Utils.CodeTools;
+using Nirvana.Common.Entities;
+using Nirvana.Common.Entities.Login;
+using Nirvana.Common.Utils.CodeTools;
 using Serilog;
 
-namespace NirvanaAPI.Manager;
+namespace Nirvana.Common.Manager;
 
 public static class InfoManager {
     // 登录成功后的游戏账号列表

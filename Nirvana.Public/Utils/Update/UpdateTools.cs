@@ -3,9 +3,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Nirvana.Common;
+using Nirvana.Common.Manager;
+using Nirvana.Common.Utils;
 using Nirvana.Public.Entities.Update;
-using NirvanaAPI.Manager;
-using NirvanaAPI.Utils;
 using Serilog;
 
 namespace Nirvana.Public.Utils.Update;

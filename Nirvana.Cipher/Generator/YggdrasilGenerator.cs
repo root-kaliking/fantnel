@@ -53,10 +53,10 @@ public static class YggdrasilGenerator {
         var authToken = profile.User.GetAuthToken();
         var seed = AesNoPadding.Encrypt(loginSeed, authToken);
         var sign = BuildSign(profile, authId, seed).EncodeSha256();
-        
+
         var signSha = Convert.ToHexString(sign);
         Log.Information("YggdrasilGenerator.Sign: {0}", signSha);
-        
+
         var client = Rsa.RsaWithPkcs1(PublicKey, signContent, false);
 
         if (client.Length < ClientKeyLength + CheckSumLength) {

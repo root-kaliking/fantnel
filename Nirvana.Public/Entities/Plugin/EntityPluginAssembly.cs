@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using NirvanaAPI.Utils;
+using Nirvana.Common.Utils;
 
 namespace Nirvana.Public.Entities.Plugin;
 

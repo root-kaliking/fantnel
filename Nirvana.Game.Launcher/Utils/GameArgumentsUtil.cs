@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using NirvanaAPI.Utils;
+using Nirvana.Common.Utils;
 
 namespace Nirvana.Game.Launcher.Utils;
 

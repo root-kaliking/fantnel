@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using NirvanaAPI.Entities.Login;
+using Nirvana.Common.Entities.Login;
 
 namespace Nirvana.Public.Entities.NEL;
 

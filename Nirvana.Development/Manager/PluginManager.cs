@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.DevPlugin.Entities;
 using Nirvana.DevPlugin.Plugins;
 using Nirvana.WPFLauncher.Utils;
-using NirvanaAPI.Utils;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.Development.Manager;

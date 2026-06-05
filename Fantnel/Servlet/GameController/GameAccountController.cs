@@ -1,12 +1,12 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using Nirvana.Common.Entities.Login;
+using Nirvana.Common.Manager;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Entities.Login;
 using Nirvana.Public.Entities.Nirvana;
 using Nirvana.Public.Message;
-using NirvanaAPI.Entities.Login;
-using NirvanaAPI.Manager;
-using NirvanaAPI.Utils;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Fantnel.Servlet.GameController;
@@ -125,7 +125,7 @@ public class GameAccountController : ControllerBase {
     [HttpPost("/api/gameaccount/random")]
     public IActionResult RandomAccountHttp([FromBody] EntityGeeTest captcha)
     {
-        AccountMessage.RandomAccount(captcha).Wait();
+        AccountMessage.RandomAccount(captcha).GetAwaiter().GetResult();
         return Ok(Code.ToJson(ErrorCode.Success));
     }
 }

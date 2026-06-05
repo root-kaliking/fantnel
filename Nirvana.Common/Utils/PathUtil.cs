@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace NirvanaAPI.Utils;
+namespace Nirvana.Common.Utils;
 
 public static class PathUtil {
     // 系统架构 - win.x64
@@ -27,7 +27,7 @@ public static class PathUtil {
 
     public static readonly string GameBasePath = Path.Combine(GamePath, "Base");
     public static readonly string GameBaseMcPath = Path.Combine(GameBasePath, ".minecraft");
-    
+
     public static readonly string GameModsPath = Path.Combine(CachePath, "GameMods");
 
     public static readonly string CppGamePath = Path.Combine(CachePath, "CppGame");
@@ -47,10 +47,10 @@ public static class PathUtil {
 
     public static readonly string Jre21Path = Path.Combine(JavaPath, "jdk21");
 
+    public static readonly string ConfigPath = Path.Combine(ResourcePath, "nirvanaAccount.json");
+
     public static string JavaExePath => GetJavaExePath(); // javaw.exe
 
-    public static readonly string ConfigPath = Path.Combine(ResourcePath, "nirvanaAccount.json");
-    
     private static string GetJavaExePath()
     {
         // Mac / Linux 没有 javaw.exe

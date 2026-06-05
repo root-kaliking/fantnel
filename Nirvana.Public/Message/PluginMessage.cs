@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Nirvana.Common.Entities;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Development.Manager;
 using Nirvana.Public.Entities.Nirvana;
 using Nirvana.WPFLauncher.Http;
-using NirvanaAPI.Entities;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.Public.Message;
@@ -73,7 +73,7 @@ public static class PluginMessage {
      */
     private static async Task<List<EntityDependence>> GetDependenceListNetAsync(string? id, string? version)
     {
-        var entity = await X19Extensions.Nirvana.Api<EntityResponse<List<EntityDependence>>>("/api/fantnel/dependence?id=" + (id ?? "") + "&version=" + (version ?? ""));
+        var entity = await X19Extensions.Nirvana.ApiAsync<EntityResponse<List<EntityDependence>>>("/api/fantnel/dependence?id=" + (id ?? "") + "&version=" + (version ?? ""));
         return entity?.Data ?? throw new ErrorCodeException(ErrorCode.NotFound);
     }
 

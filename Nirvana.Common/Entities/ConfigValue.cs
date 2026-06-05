@@ -2,33 +2,25 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace NirvanaAPI.Entities;
+namespace Nirvana.Common.Entities;
 
 public class ConfigValue<T> : IConfigValue {
-    
-    public required string Name { get; init; }
-    
-    public T? Value;
     private T? _default;
-    
+
+    public T? Value;
+
     public ConfigValue(T? defaultValue)
     {
         SetDefault(defaultValue);
     }
 
-    public ConfigValue()
-    {
-    }
-    
+    public ConfigValue() { }
+
+    public required string Name { get; init; }
+
     public bool EqualsName(string name)
     {
         return Name.Equals(name, StringComparison.OrdinalIgnoreCase);
-    }
-    
-    public void SetDefault(T? defaultValue)
-    {
-        Value = defaultValue;
-        _default = defaultValue;
     }
 
     public void SetDefaultFrom(object? value)
@@ -40,7 +32,6 @@ public class ConfigValue<T> : IConfigValue {
     public void SetFrom(object? value)
     {
         while (true) {
-            
             switch (value) {
                 case null:
                     Value = _default;
@@ -57,6 +48,7 @@ public class ConfigValue<T> : IConfigValue {
                 if (value is string stringValue) {
                     Value = (T)(object)double.Parse(stringValue);
                 }
+
                 return;
             }
 
@@ -64,6 +56,7 @@ public class ConfigValue<T> : IConfigValue {
                 if (value is string stringValue) {
                     Value = (T)(object)float.Parse(stringValue);
                 }
+
                 return;
             }
 
@@ -71,6 +64,7 @@ public class ConfigValue<T> : IConfigValue {
                 if (value is string stringValue) {
                     Value = (T)(object)bool.Parse(stringValue);
                 }
+
                 return;
             }
 
@@ -78,6 +72,7 @@ public class ConfigValue<T> : IConfigValue {
                 if (value is string stringValue) {
                     Value = (T)(object)int.Parse(stringValue);
                 }
+
                 return;
             }
 
@@ -105,12 +100,13 @@ public class ConfigValue<T> : IConfigValue {
         if (Value == null) {
             return true;
         }
+
         return _default != null && _default.Equals(Value);
     }
 
     public void ToAdd(JsonObject jsonObj)
     {
-        JsonNode? jsonNode = GetValueTo() switch {
+        var jsonNode = GetValueTo() switch {
             string value => value,
             double doubleValue => doubleValue,
             float floatValue => floatValue,
@@ -121,5 +117,10 @@ public class ConfigValue<T> : IConfigValue {
         };
         jsonObj.Add(Name, jsonNode);
     }
-    
+
+    public void SetDefault(T? defaultValue)
+    {
+        Value = defaultValue;
+        _default = defaultValue;
+    }
 }

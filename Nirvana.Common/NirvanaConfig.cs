@@ -5,15 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using NirvanaAPI.Entities;
-using NirvanaAPI.Utils;
-using NirvanaAPI.Utils.CodeTools;
+using Nirvana.Common.Entities;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.CodeTools;
 using Serilog;
 
-namespace NirvanaAPI;
+namespace Nirvana.Common;
 
 public class NirvanaConfig {
-
     private static readonly List<IConfigValue> ConfigValues = [
         new ConfigValue<bool>(true) {
             Name = "hideAccount"
@@ -56,7 +55,7 @@ public class NirvanaConfig {
         }, // 163Email 设备 ID
         new ConfigValue<string> {
             Name = "netease_unique"
-        }, // 163Email 唯一标识
+        } // 163Email 唯一标识
     ];
 
     // 初始化
@@ -79,35 +78,36 @@ public class NirvanaConfig {
             }
         }
     }
-    
+
     private static void AddFromJsonNode(string name, JsonNode? node)
     {
         if (node == null) {
             return;
         }
+
         if (node.GetValueKind() == JsonValueKind.String) {
             ConfigValues.Add(new ConfigValue<string> {
-                Name = name, 
+                Name = name,
                 Value = node.ToString()
             });
         } else if (node.GetValueKind() == JsonValueKind.Number) {
-            ConfigValues.Add(new ConfigValue<double> { 
-                Name = name, 
-                Value = node.GetValue<double>() 
+            ConfigValues.Add(new ConfigValue<double> {
+                Name = name,
+                Value = node.GetValue<double>()
             });
         } else if (node.GetValueKind() == JsonValueKind.True) {
             ConfigValues.Add(new ConfigValue<bool> {
-                Name = name, 
+                Name = name,
                 Value = true
             });
         } else if (node.GetValueKind() == JsonValueKind.False) {
             ConfigValues.Add(new ConfigValue<bool> {
-                Name = name, 
+                Name = name,
                 Value = false
             });
-        }else if (node.GetValueKind() == JsonValueKind.Object) {
+        } else if (node.GetValueKind() == JsonValueKind.Object) {
             ConfigValues.Add(new ConfigValue<JsonNode> {
-                Name = name, 
+                Name = name,
                 Value = node
             });
         }
@@ -130,17 +130,20 @@ public class NirvanaConfig {
         if (config == null) {
             throw new KeyNotFoundException();
         }
+
         var context = config.GetValueTo();
         if (context == null && defaultValue != null) {
             var defaultVal = defaultValue.Invoke();
             SetValue(name, defaultVal);
             return defaultVal;
         }
+
         ArgumentNullException.ThrowIfNull(context);
-        
+
         if (context is JsonNode jsonObject) {
             return jsonObject.Deserialize<T>() ?? throw new InvalidOperationException();
         }
+
         return (T)Convert.ChangeType(context, typeof(T));
     }
 
@@ -166,14 +169,14 @@ public class NirvanaConfig {
             if (defaultValue != null) {
                 configValue.SetDefault(parser(defaultValue));
             }
+
             ConfigValues.Add(configValue);
         }
     }
 
     public static void AddByTypeName(string name, string? defaultValue, string? typeName)
     {
-        switch (typeName?.ToLower())
-        {
+        switch (typeName?.ToLower()) {
             case "string":
                 AddOrUpdate(name, defaultValue, s => s);
                 break;
@@ -194,7 +197,7 @@ public class NirvanaConfig {
                 break;
         }
     }
-    
+
     private static string ToString(bool showDefault = true)
     {
         return JsonSerializer.Serialize(GetJsonObject(showDefault));
@@ -209,6 +212,7 @@ public class NirvanaConfig {
                 obj.ToAdd(jsonObj);
             }
         }
+
         return jsonObj;
     }
 

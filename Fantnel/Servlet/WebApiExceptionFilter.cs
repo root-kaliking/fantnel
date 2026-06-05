@@ -4,11 +4,11 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Nirvana.Common.Entities;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Entities.Nirvana;
 using Nirvana.WPFLauncher.Entities;
-using NirvanaAPI.Entities;
-using NirvanaAPI.Utils;
-using NirvanaAPI.Utils.CodeTools;
 
 namespace Fantnel.Servlet;
 
@@ -43,7 +43,7 @@ public class WebApiExceptionFilter : ExceptionFilterAttribute {
                 break;
             }
 
-            array.Add(stackTraceFrame.ToJsonDocument());
+            stackTraceFrame.ToAdd(array);
         }
 
         response.Data = array;

@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Nirvana.Common.Utils;
 using Nirvana.Game.Launcher.Services.Java;
 using Nirvana.Game.Launcher.Utils;
-using NirvanaAPI.Utils;
 using Serilog;
 
 namespace Nirvana.Game.Launcher.Entities;
@@ -132,7 +132,7 @@ public class EntityJavaFile {
             return false;
         }
 
-        DownloadAsync().Wait();
+        DownloadAsync().GetAwaiter().GetResult();
         return true;
     }
 

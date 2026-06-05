@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.Progress;
 using Nirvana.Game.Launcher.Entities;
-using Nirvana.Game.Launcher.Utils.Progress;
-using NirvanaAPI.Utils;
 using Serilog;
 
 namespace Nirvana.Game.Launcher.Services.Bedrock;
@@ -152,7 +152,10 @@ public sealed class LauncherService : IDisposable {
 
     private void UpdateProgress(int percent, string message)
     {
-        if (_disposed) return;
+        if (_disposed) {
+            return;
+        }
+
         var value = LastProgress = new EntityProgressUpdate {
             Id = Identifier,
             Percent = percent,

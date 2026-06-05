@@ -4,14 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Nirvana.Common;
+using Nirvana.Common.Entities;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Development.Manager;
 using Nirvana.Game.Launcher.Utils;
 using Nirvana.Public.Entities.Nirvana;
 using Nirvana.Public.Entities.Plugin;
 using Nirvana.WPFLauncher.Http;
-using NirvanaAPI;
-using NirvanaAPI.Entities;
-using NirvanaAPI.Utils.CodeTools;
 using Serilog;
 
 namespace Nirvana.Public.Message;
@@ -30,7 +30,7 @@ public static class PlugInstoreMessage {
             // 分页 异常顺序 检测
             var size = offset + (limit - 10);
             if (PluginList.Count < size) {
-                GetPluginList(0, size).Wait();
+                GetPluginList(0, size).GetAwaiter().GetResult();
             }
 
             // 分页
@@ -41,7 +41,7 @@ public static class PlugInstoreMessage {
         }
 
         // 没有 就从 插件商店 获取
-        var plugins = await X19Extensions.Nirvana.Api<EntityResponse<EntityComponents[]>>($"/api/fantnel/plugin/get?offset={offset}&limit={limit}");
+        var plugins = await X19Extensions.Nirvana.ApiAsync<EntityResponse<EntityComponents[]>>($"/api/fantnel/plugin/get?offset={offset}&limit={limit}");
         if (plugins?.Data == null) {
             throw new ErrorCodeException(ErrorCode.FormatError);
         }
@@ -71,12 +71,12 @@ public static class PlugInstoreMessage {
 
     public static EntityResponse<EntityPlugin>? GetPluginDetail(string id)
     {
-        return X19Extensions.Nirvana.Api<EntityResponse<EntityPlugin>>($"/api/fantnel/plugin/get/by-id?id={id}").GetAwaiter().GetResult();
+        return X19Extensions.Nirvana.Api<EntityResponse<EntityPlugin>>($"/api/fantnel/plugin/get/by-id?id={id}");
     }
 
     private static EntityResponse<EntityPluginDownResponse>? GetDownloadInfoUrl(string id)
     {
-        return X19Extensions.Nirvana.Api<EntityResponse<EntityPluginDownResponse>>($"/api/fantnel/plugin/get/download?id={id}").GetAwaiter().GetResult();
+        return X19Extensions.Nirvana.Api<EntityResponse<EntityPluginDownResponse>>($"/api/fantnel/plugin/get/download?id={id}");
     }
 
     private static string GetDownloadUrl(string id)
@@ -148,7 +148,7 @@ public static class PlugInstoreMessage {
         }
 
         path += ".dll";
-        DownloadUtil.DownloadAsync(GetDownloadUrl(id), path, detail.Data.Name + " [" + detail.Data.Version + "]").Wait();
+        DownloadUtil.DownloadAsync(GetDownloadUrl(id), path, detail.Data.Name + " [" + detail.Data.Version + "]").GetAwaiter().GetResult();
     }
 
     /**

@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\NirvanaAPI\NirvanaAPI.csproj"/>
+        <ProjectReference Include="..\Nirvana.Common\Nirvana.Common.csproj"/>
     </ItemGroup>
 
 </Project>

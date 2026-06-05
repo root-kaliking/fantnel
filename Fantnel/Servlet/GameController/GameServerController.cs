@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Entities.NEL;
 using Nirvana.Public.Message;
 using Nirvana.WPFLauncher.Protocol;
-using NirvanaAPI.Utils.CodeTools;
 
 namespace Fantnel.Servlet.GameController;
 
@@ -43,10 +43,16 @@ public class GameServerController : ControllerBase {
     [HttpPost("/api/gameserver/createname")]
     public IActionResult CreateGameName([FromBody] EntityNewName name)
     {
-        if (name.Id == null) throw new ErrorCodeException(ErrorCode.ServerInNot);
-        if (name.Name == null) throw new ErrorCodeException(ErrorCode.NameInNot);
-        NPFLauncher.CreateCharacterAsync(name.Id, name.Name).Wait(); // 创建游戏角色
-        ServersGameMessage.GetUserName(name.Id, name.Name).Wait(); // 防止缓存
+        if (name.Id == null) {
+            throw new ErrorCodeException(ErrorCode.ServerInNot);
+        }
+
+        if (name.Name == null) {
+            throw new ErrorCodeException(ErrorCode.NameInNot);
+        }
+
+        NPFLauncher.CreateCharacterAsync(name.Id, name.Name).GetAwaiter().GetResult(); // 创建游戏角色
+        ServersGameMessage.GetUserName(name.Id, name.Name).GetAwaiter().GetResult(); // 防止缓存
         return Ok(Code.ToJson(ErrorCode.Success));
     }
 }

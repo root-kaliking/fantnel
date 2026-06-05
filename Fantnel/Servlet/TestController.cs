@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NirvanaAPI.Manager;
-using NirvanaAPI.Utils.CodeTools;
+using Nirvana.Common.Manager;
+using Nirvana.Common.Utils.CodeTools;
 
 namespace Fantnel.Servlet;
 

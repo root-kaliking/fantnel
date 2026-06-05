@@ -1,6 +1,6 @@
-﻿using NirvanaAPI.Utils;
+﻿using Nirvana.Common.Utils;
 
-namespace Nirvana.Public;
+namespace Nirvana.Common;
 
 public static class PublicProgram {
     // Fantnel 版本

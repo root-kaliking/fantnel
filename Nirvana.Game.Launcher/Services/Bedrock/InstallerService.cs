@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Nirvana.Common.Utils;
+using Nirvana.Common.Utils.Progress;
 using Nirvana.Game.Launcher.Utils;
-using Nirvana.Game.Launcher.Utils.Progress;
-using NirvanaAPI.Utils;
 
 namespace Nirvana.Game.Launcher.Services.Bedrock;
 
@@ -18,7 +18,7 @@ public static class InstallerService {
             }
 
             FileUtil.CleanDirectorySafe(paths.BasePath);
-            using var progressBar = new SyncProgressBarUtil.ProgressBar();
+            var progressBar = new SyncProgressBarUtil.ProgressBar();
             var progress = CreateProgressReporter(progressBar);
             if (!await DownloadMinecraftPackage(paths.ArchivePath, progress)) {
                 return false;
@@ -77,14 +77,15 @@ public static class InstallerService {
     {
         progress.Report(new SyncProgressBarUtil.ProgressReport {
             Percent = 0,
-            Message = "Checking package validation"
+            Message = "Checking Package"
         });
         if (!await ValidatePackageAsync(archivePath, "50ac5016023c295222b979565b9c707b")) {
             return false;
         }
+
         progress.Report(new SyncProgressBarUtil.ProgressReport {
             Percent = 100,
-            Message = "Package validation succeeded"
+            Message = "Package Validation"
         });
         return true;
     }

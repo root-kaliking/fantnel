@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using Nirvana.Cipher.Cipher;
 using Nirvana.Cipher.Extensions;
-using NirvanaAPI.Entities.Login;
+using Nirvana.Common.Entities.Login;
 
 namespace Nirvana.Cipher.Entities.Yggdrasil;
 

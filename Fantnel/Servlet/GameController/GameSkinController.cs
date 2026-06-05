@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nirvana.Common.Utils.CodeTools;
 using Nirvana.Public.Entities.NEL;
 using Nirvana.Public.Message;
 using Nirvana.WPFLauncher.Protocol;
-using NirvanaAPI.Utils.CodeTools;
 
 namespace Fantnel.Servlet.GameController;
 
@@ -26,7 +26,7 @@ public class GameSkinController : ControllerBase {
     [HttpGet("/api/gameskin/set")]
     public IActionResult SetSkinHttp([FromQuery] string id)
     {
-        NPFLauncher.SetSkinAsync(id).Wait();
+        NPFLauncher.SetSkinAsync(id).GetAwaiter().GetResult();
         return Ok(Code.ToJson(ErrorCode.Success));
     }
 }

@@ -38,7 +38,7 @@ public class X19Extensions(string url, bool token = true) {
         return body == null ? await HttpWrapper.GetAsync(url) : await HttpWrapper.PostAsync(url, body);
     }
 
-    private async Task<string> Api(string url, byte[]? body = null)
+    private async Task<string> ApiAsync(string url, byte[]? body = null)
     {
         var response = await ApiSendBytes(url, body);
         response.EnsureSuccessStatusCode();
@@ -47,16 +47,21 @@ public class X19Extensions(string url, bool token = true) {
 
     public async Task<T?> ApiBytes<T>(string url, byte[]? body = null)
     {
-        var response = await Api(url, body);
+        var response = await ApiAsync(url, body);
         return ToType<T>(response);
     }
 
-    public async Task<T?> Api<T>(string url, object? body = null, string? userId = null, string? userToken = null)
+    public async Task<T?> ApiAsync<T>(string url, object? body = null, string? userId = null, string? userToken = null)
     {
-        return await Api<T>(url, body == null ? null : JsonSerializer.Serialize(body, NPFLauncher.DefaultOptions), userId, userToken);
+        return await ApiAsync<T>(url, body == null ? null : JsonSerializer.Serialize(body, NPFLauncher.DefaultOptions), userId, userToken);
     }
 
-    private async Task<T?> Api<T>(string url, string? body = null, string? userId = null, string? userToken = null)
+    public T? Api<T>(string url, object? body = null, string? userId = null, string? userToken = null)
+    {
+        return ApiAsync<T>(url, body, userId, userToken).GetAwaiter().GetResult();
+    }
+
+    private async Task<T?> ApiAsync<T>(string url, string? body = null, string? userId = null, string? userToken = null)
     {
         var response = await ApiRawByString(url, body, userId, userToken);
         return ToType<T>(response);
@@ -86,10 +91,15 @@ public class X19Extensions(string url, bool token = true) {
         return await response.Content.ReadAsStringAsync();
     }
 
-    public async Task<byte[]?> ApiRawB(string url, string? body = null, string? userId = null, string? userToken = null)
+    private async Task<byte[]?> ApiAsyncRawB(string url, string? body = null, string? userId = null, string? userToken = null)
     {
         var response = await ApiSend(url, body, userId, userToken);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadAsByteArrayAsync();
+    }
+
+    public byte[]? ApiRawB(string url, string? body = null, string? userId = null, string? userToken = null)
+    {
+        return ApiAsyncRawB(url, body, userId, userToken).GetAwaiter().GetResult();
     }
 }
