@@ -128,7 +128,7 @@ public static class InitProgram {
             return;
         }
 
-        PublicProgram.LatestVersion = false;
+        PublicProgram.LatestVersion = true;
     }
 
     // Fantnel 在线检测
@@ -183,14 +183,10 @@ public static class InitProgram {
             X19.CrcSalt = InfoManager.FantnelInfo.CrcSalt;
         }
 
-        if (string.IsNullOrEmpty(X19.CrcSalt)) {
-            Log.Error("CRC Salt 计算失败!");
-            Thread.Sleep(6000);
-            Environment.Exit(1);
-            return;
+        if (X19.CrcSalt != null && X19.CrcSalt.Length > 6 ) {
+            Log.Information("CRC Salt 计算完成: {0}....", X19.CrcSalt[..6]);
         }
 
-        Log.Information("CRC Salt 计算完成: {0}....", X19.CrcSalt[..6]);
     }
 
     public static async Task<bool> SafeTheme(string themeValue)

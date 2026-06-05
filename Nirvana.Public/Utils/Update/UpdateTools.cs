@@ -22,7 +22,7 @@ public static class UpdateTools {
             return;
         }
 
-        if (!"1.0.0".Equals(InfoManager.FantnelInfo.UpdateVersions)) {
+        if (!PublicProgram.UpdateVersion.Equals(InfoManager.FantnelInfo.UpdateVersions)) {
             Log.Error("当前版本已被禁用，请前往官网重新下载！");
             Thread.Sleep(6000);
             Environment.Exit(1);

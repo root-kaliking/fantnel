@@ -6,6 +6,7 @@ using Nirvana.Cipher.Yggdrasil;
 using Nirvana.Common.Entities;
 using Nirvana.Common.Entities.Login;
 using Nirvana.WPFLauncher.Http;
+using Nirvana.WPFLauncher.Protocol;
 using Serilog;
 
 namespace Nirvana.Cipher.Cipher.Nirvana.Connection;
@@ -48,9 +49,10 @@ public static class NetEaseConnection {
 
     private static async Task<bool> CreateAuthenticatorAsync(GameProfile gameProfile, string serverId)
     {
-        Log.Warning("[认证] 认证中: {0}", serverId);
         Exception? exception;
         try {
+            X19.GetCrcSalt();
+            Log.Warning("[认证] 认证中: {0}", serverId);
             await StandardYggdrasil.JoinServerAsync(gameProfile, serverId);
             Log.Information("[认证] 认证完成!");
             return true;
