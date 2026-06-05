@@ -23,7 +23,7 @@ public static class X19 {
      */
     private static string GetLatestVersion()
     {
-        var content = X19Extensions.UpdateNetease.Api<string>("https://x19.update.netease.com/pl/x19_java_patchlist");
+        var content = X19Extensions.UpdateNetease.Api<string>("/pl/x19_java_patchlist");
         ArgumentException.ThrowIfNullOrEmpty(content);
 
         const string size = "\":{\"size\":";

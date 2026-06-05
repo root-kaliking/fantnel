@@ -294,4 +294,45 @@ public static class Tools {
         var dirInfo = new DirectoryInfo(path);
         return dirInfo.Attributes.HasFlag(FileAttributes.ReparsePoint);
     }
+
+    public static string GetRandomCpuType()
+    {
+        string[] cpuMode = ["", "H", "F", "K", "KF"];
+        
+        string[] list = [
+            "Intel(R) Core(TM) i3-10100",
+            "Intel(R) Core(TM) i3-12100",
+            "Intel(R) Core(TM) i3-13100",
+            
+            "Intel(R) Core(TM) i5-10400",
+            "Intel(R) Core(TM) i5-11400",
+            "Intel(R) Core(TM) i5-12400",
+            "Intel(R) Core(TM) i5-13400",
+            
+            "Intel(R) Core(TM) i7-10700",
+            "Intel(R) Core(TM) i7-11700",
+            "Intel(R) Core(TM) i7-12700",
+            
+            "Intel(R) Core(TM) i9-9900",
+            "Intel(R) Core(TM) i9-10900",
+            "Intel(R) Core(TM) i9-12900",
+            "Intel(R) Core(TM) i9-13900",
+            "Intel(R) Core(TM) i9-14900",
+        ];
+        return list[Random.Shared.Next(list.Length)] + cpuMode[Random.Shared.Next(cpuMode.Length)];
+    }
+
+    public static string GetRandomRamSize()
+    {
+        int[] list = [
+            4, // 2+2
+            6, // 4+2
+            8, // 4+4
+            16, // 8+8
+        ];
+        const long ram = 1024L * 1024L * 1024L;
+        var index = Random.Shared.Next(list.Length);
+        return (list[index] * ram).ToString();
+    }
+    
 }

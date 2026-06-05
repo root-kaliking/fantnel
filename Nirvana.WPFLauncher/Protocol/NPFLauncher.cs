@@ -257,7 +257,7 @@ public static class NPFLauncher {
             PayChannel = entityX19Cookie.AppChannel,
             Disk = upper
         };
-        var entity = JsonSerializer.Deserialize<EntityWPFLauncher<EntityAuthenticationOtp>>(HttpUtil.HttpDecrypt(await (await X19Extensions.Core.HttpWrapper.PostAsync("/authentication-otp", HttpUtil.HttpEncrypt(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new EntityAuthenticationData {
+        var authenticationData = new EntityAuthenticationData {
             SaData = JsonSerializer.Serialize(authenticationDetail, DefaultOptions),
             AuthJson = cookieRequest.Json,
             Version = new EntityAuthenticationVersion {
@@ -266,7 +266,10 @@ public static class NPFLauncher {
             Aid = otp.Aid.ToString(),
             OtpToken = otp.OtpToken,
             LockTime = 0
-        }, DefaultOptions))))).Content.ReadAsByteArrayAsync()));
+        };
+        var response = await X19Extensions.Core.HttpWrapper.PostAsync("/authentication-otp", HttpUtil.HttpEncrypt(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(authenticationData, DefaultOptions))));
+        var body = await response.Content.ReadAsByteArrayAsync();
+        var entity = JsonSerializer.Deserialize<EntityWPFLauncher<EntityAuthenticationOtp>>(HttpUtil.HttpDecrypt(body));
         if (entity == null) {
             throw new ErrorCodeException(ErrorCode.LoginError);
         }
