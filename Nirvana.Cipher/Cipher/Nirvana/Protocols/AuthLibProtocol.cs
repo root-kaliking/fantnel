@@ -11,7 +11,7 @@ using Serilog;
 
 namespace Nirvana.Cipher.Cipher.Nirvana.Protocols;
 
-public class AuthLibProtocol(IPAddress address, int port, string modList, string version, EntityUserInfo account) : IDisposable {
+public class AuthLibProtocol(int port, string modList, string version, EntityUserInfo account) : IDisposable {
     private readonly CancellationTokenSource _cts = new();
 
     private Task? _acceptLoopTask;
@@ -50,7 +50,7 @@ public class AuthLibProtocol(IPAddress address, int port, string modList, string
     public void Start()
     {
         if (!_disposed) {
-            _listener = new TcpListener(address, port);
+            _listener = new TcpListener(IPAddress.Loopback, port);
             _listener.Start();
             _acceptLoopTask = AcceptLoopAsync(_cts.Token);
         } else {
@@ -63,7 +63,9 @@ public class AuthLibProtocol(IPAddress address, int port, string modList, string
         while (!token.IsCancellationRequested && !_disposed) {
             try {
                 if (_listener != null) {
-                    await HandleClientAsync(await _listener.AcceptTcpClientAsync(token).ConfigureAwait(false), token);
+                    var client = await _listener.AcceptTcpClientAsync(token);
+                    Log.Information("[AuthSock] Accepted: {0}", client.Client.RemoteEndPoint);
+                    await HandleClientAsync(client, token);
                 }
             } catch (ObjectDisposedException) {
                 break;

@@ -61,7 +61,6 @@ public class GameRpcService(int port, EntityLaunchGame launchGame, EnumGameVersi
             _mMcControlListener = new TcpListener(IPAddress.Loopback, port);
             _mMcControlListener.Start();
             _ = Task.Run(ListenControlConnect);
-            Console.WriteLine();
             Log.Information("[RPC] Control connection started on port {0}", port);
         } catch (Exception exception) {
             if (tryTimes > 0) {
@@ -221,7 +220,7 @@ public class GameRpcService(int port, EntityLaunchGame launchGame, EnumGameVersi
                 _writer = new BinaryWriter(stream);
                 SendCacheControlData();
                 _ = Task.Run(OnRecvControlData);
-                Log.Information("[RPC] Accepted control connection from {0}", tcpClient.Client.RemoteEndPoint?.ToString());
+                Log.Information("[RPC] Accepted: {0}", tcpClient.Client.RemoteEndPoint);
             }
         } catch {
             Log.Error("[RPC] Failed to listen control connection");

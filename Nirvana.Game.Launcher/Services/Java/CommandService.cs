@@ -32,11 +32,11 @@ public class CommandService {
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    private readonly List<EntityJavaFile> _minecraft = []; // path, url
-    private readonly string _version;
-    private readonly string _versionPath;
+    private List<EntityJavaFile> _minecraft = []; // path, url
+    private string _version = string.Empty;
+    private string _versionPath = string.Empty;
 
-    private string _cmd = "";
+    private string _cmd = string.Empty;
     private string _nativesPath = string.Empty;
     public required EnumGameVersion GameVersion;
     public required EntityLaunchGame LauncherGame;
@@ -46,7 +46,7 @@ public class CommandService {
     public required string Uuid;
     public required string WorkPath;
 
-    public CommandService()
+    public CommandService Init()
     {
         _version = GameVersionUtil.GetGameVersionFromEnum(GameVersion);
         _versionPath = Path.Combine(PathUtil.GameBaseMcPath, "versions", _version);
@@ -61,10 +61,7 @@ public class CommandService {
                 Log.Error("BmclApi returned null, version: {0}", _version);
             }
         }
-    }
-
-    public CommandService Init()
-    {
+        
         var versionJson = Path.Combine(_versionPath, _version + ".json");
         if (!File.Exists(versionJson)) {
             throw new Exception("Game version JSON not found, please go to Setting to fix the game file and try again.");

@@ -175,8 +175,9 @@ public sealed class LauncherService : IDisposable {
 
     private void StartAuthenticationService()
     {
-        _authLibProtocol = new AuthLibProtocol(IPAddress.Parse("127.0.0.1"), _socketPort, JsonSerializer.Serialize(_modList), Entity.GameVersion, Entity.Account);
+        _authLibProtocol = new AuthLibProtocol(_socketPort, JsonSerializer.Serialize(_modList), Entity.GameVersion, Entity.Account);
         _authLibProtocol.Start();
+        Log.Information("[AuthSock] Control connection started on port {0}", _socketPort);
     }
 
     private async Task StartGameProcessAsync(CommandService commandService)
@@ -194,7 +195,6 @@ public sealed class LauncherService : IDisposable {
         GameProcess = process;
         GameProcess.EnableRaisingEvents = true;
         SyncProgressBarUtil.ProgressBar.ClearCurrent();
-        Console.WriteLine();
         Log.Information("Game launched successfully. Game Version: {0}, Process ID: {1}, Role: {2}", Entity.GameVersion, process.Id, Entity.RoleName);
         return Task.CompletedTask;
     }
