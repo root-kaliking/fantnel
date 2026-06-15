@@ -52,33 +52,33 @@ public static class NetEaseConnection {
         Exception? exception;
         try {
             X19.GetCrcSalt();
-            Log.Warning("[认证] 认证中: {0}", serverId);
+            Log.Warning("[Authentication] Joining Server: {0}", serverId);
             await StandardYggdrasil.JoinServerAsync(gameProfile, serverId);
-            Log.Information("[认证] 认证完成!");
+            Log.Information("[Authentication] Success!");
             return true;
         } catch (Exception e) {
             exception = e;
         }
 
         if (IsServerAuthenticated) {
-            Log.Warning("[代理认证] 认证中: {0}", serverId);
+            Log.Warning("[Authentication] Authenticating Server: {0}", serverId);
             var data = await X19Extensions.Nirvana.ApiAsync<EntityResponseBase>($"/api/fantnel/authenticated?id={serverId}", gameProfile);
             if (data == null) {
-                Log.Error("[代理认证]: {0}", JsonSerializer.Serialize(gameProfile));
-                Log.Error("[代理认证]: 出错！");
+                Log.Error("[Authentication]: {0}", JsonSerializer.Serialize(gameProfile));
+                Log.Error("[Authentication]: Error!");
                 return false;
             }
 
             if (data.Code == 1) {
-                Log.Information("[代理认证] 成功!");
+                Log.Information("[Authentication] Success!");
                 return true;
             }
 
-            Log.Information("[代理认证] 失败: {0}", data.Message);
+            Log.Information("[Authentication] Failed: {0}", data.Message);
         }
 
-        Log.Error("[认证]: {0}", JsonSerializer.Serialize(gameProfile));
-        Log.Error("[认证] 认证失败: {0}", exception.Message);
+        Log.Error("[Authentication]: {0}", JsonSerializer.Serialize(gameProfile));
+        Log.Error("[Authentication] Failed: {0}", exception.Message);
         throw exception;
         // return false;
     }

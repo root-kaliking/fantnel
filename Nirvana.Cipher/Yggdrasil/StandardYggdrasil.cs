@@ -59,7 +59,7 @@ public static class StandardYggdrasil {
         using var receive = await stream.ReadSteamWithInt16Async();
 
         if (receive.Length < 272) {
-            throw new Exception("Invalid response length");
+            throw new Exception("Invalid Response Length");
         }
 
         var loginSeed = new byte[16];
@@ -73,7 +73,7 @@ public static class StandardYggdrasil {
         using var response = await stream.ReadSteamWithInt16Async();
 
         if (response.Length < 1) {
-            throw new Exception("Empty response");
+            throw new Exception("Empty Response");
         }
 
         var status = response.ReadByte();

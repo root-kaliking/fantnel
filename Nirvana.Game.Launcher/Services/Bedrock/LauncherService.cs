@@ -111,13 +111,13 @@ public sealed class LauncherService : IDisposable {
         var argumentsPath = Path.Combine(PathUtil.CppGamePath, "launch.cppconfig");
         var process = CommandService.StartGame(launchPath, argumentsPath);
         if (process == null) {
-            Log.Error("Game launch failed for LaunchType: {0}, Role: {1}", Entity.LaunchType, Entity.RoleName);
+            Log.Error("[Launch] Game Failed For LaunchType: {0}, Role: {1}", Entity.LaunchType, Entity.RoleName);
             throw new InvalidOperationException("Failed to start game process");
         }
 
         SetupGameProcess(process);
         UpdateProgress(100, "Running");
-        Log.Information("Game launched successfully. LaunchType: {0}, ProcessID: {1}, Role: {2}", Entity.LaunchType, process.Id, Entity.RoleName);
+        Log.Information("[Launch] Game Success. LaunchType: {0}, ProcessID: {1}, Role: {2}", Entity.LaunchType, process.Id, Entity.RoleName);
         return Task.CompletedTask;
     }
 
