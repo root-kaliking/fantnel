@@ -26,7 +26,7 @@ public static class InitProgram {
 
         // 检查更新
         Log.Information("{0}", PathUtil.ResourcePath);
-        UpdateTools.CheckUpdate(args).GetAwaiter().GetResult();
+        UpdateTools.CheckUpdate(args);
 
         // 重置日志
         logInit.Invoke();
@@ -156,7 +156,12 @@ public static class InitProgram {
         }
     }
 
-    public static async Task FantnelInit()
+    public static void FantnelInit()
+    {
+        FantnelInitAsync().GetAwaiter().GetResult();
+    }
+
+    private static async Task FantnelInitAsync()
     {
         for (var i = 0; i < 3; i++) {
             try {

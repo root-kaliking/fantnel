@@ -12,8 +12,15 @@ using Serilog;
 namespace Nirvana.Public.Utils.Update;
 
 public static class UpdateTools {
+    
     // 检查更新
-    public static async Task CheckUpdate(string[] args)
+    public static void CheckUpdate(string[] args)
+    {
+        CheckUpdateAsync(args).GetAwaiter().GetResult();
+    }
+
+    // 检查更新
+    private static async Task CheckUpdateAsync(string[] args)
     {
         if (InfoManager.FantnelInfo == null) {
             Log.Error("无法连接至服务器！");

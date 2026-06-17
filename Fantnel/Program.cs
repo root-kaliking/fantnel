@@ -25,7 +25,7 @@ public static class Program {
         LogoInit(); // 初始化日志
 
         // Fantnel 服务器信息 初始化
-        InitProgram.FantnelInit().GetAwaiter().GetResult();
+        InitProgram.FantnelInit();
         // 检查更新
         InitProgram.CheckUpdate(args, LogoInit);
 
