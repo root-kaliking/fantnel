@@ -1,5 +1,5 @@
 # Fantnel
-    
+
 Fantnel 是一个基于 .NET 10.0 ASP 开发的 完全脱离盒子 项目。
 
 #### 相关项目
@@ -94,8 +94,8 @@ Fantnel 是一个基于 .NET 10.0 ASP 开发的 完全脱离盒子 项目。
 ## 🌐 官方资源
 
 - **官方网站**: https://npyyds.top/
-- **Gitee 仓库**: https://gitee.com/newNP/fantnel/
-- **GitHub 仓库**: https://github.com/NirvanaTec/fantnel/
+- **Gitee 仓库**: https://gitee.com/fengheng1111/fantnel/
+- **GitHub 仓库**: https://github.com/fengheng1111/fantnel/
 
 ---
 
