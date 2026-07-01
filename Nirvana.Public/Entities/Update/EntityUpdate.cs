@@ -106,6 +106,11 @@ public class EntityUpdate {
             Directory.Delete(PathUtil.UpdaterPath, true);
         }
 
+        // UI 更新使用串行下载，避免触发 429
+        if (Mode.StartsWith("ui.")) {
+            return await CheckUpdateSequential(jsonArray, downloadProgress, basePathList);
+        }
+
         var count = 0;
         var progress = 0;
         var threads = new List<Thread>();
@@ -148,6 +153,47 @@ public class EntityUpdate {
 
         foreach (var thread in threads) {
             thread.Join();
+        }
+
+        if (count > 0) {
+            await SafeRestartUpdate(1);
+        }
+
+        return count;
+    }
+
+    /**
+     * 串行下载（用于 UI 更新，避免并发请求触发 429）
+     */
+    private async Task<int> CheckUpdateSequential(JsonArray jsonArray, Action<double>? downloadProgress = null, params string[] basePathList)
+    {
+        var count = 0;
+        for (var i = 0; i < jsonArray.Count; i++) {
+            var jsonNode = jsonArray[i];
+            var entityUpdate = new EntityUpdateFile(jsonNode) {
+                Index = i
+            };
+            var filePath = entityUpdate.GetPath(false, basePathList);
+            if (string.IsNullOrEmpty(filePath)) {
+                Log.Warning("无法获取 [{0}] 的保存路径！", entityUpdate.Index);
+                continue;
+            }
+
+            var safeSavePath = filePath;
+            if (SafeMode) {
+                safeSavePath = entityUpdate.GetPath(true, basePathList);
+                if (string.IsNullOrEmpty(safeSavePath)) {
+                    Log.Warning("无法获取 [{0}] 的保存路径！", entityUpdate.Index);
+                    continue;
+                }
+            }
+
+            var success = await CheckUpdateSingle(entityUpdate, filePath, safeSavePath);
+            if (success == 1) {
+                count++;
+            }
+
+            downloadProgress?.Invoke(100.0 / jsonArray.Count * (i + 1));
         }
 
         if (count > 0) {
