@@ -18,7 +18,7 @@ public static class DownloadUtil {
 
             var downloadOpt = new DownloadConfiguration {
                 ChunkCount = 1, // 单块下载，避免并发请求
-                MaxTryAgainOnFailover = 2, // 最多重试2次，避免429
+                MaxTryAgainOnFailure = 2, // 最多重试2次，避免429
                 ParallelDownload = false, // 禁用并行下载
                 EnableAutoResumeDownload = true // 启用自动续传功能
             };
