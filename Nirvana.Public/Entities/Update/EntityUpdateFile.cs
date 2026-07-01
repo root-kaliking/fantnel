@@ -88,7 +88,7 @@ public class EntityUpdateFile {
         while (true) {
             lock (Lock) {
                 // 未达到上限，允许下载
-                if (_downloadCountInSecond < 3) {
+                if (_downloadCountInSecond < 2) {
                     _downloadCountInSecond++;
                     break;
                 }

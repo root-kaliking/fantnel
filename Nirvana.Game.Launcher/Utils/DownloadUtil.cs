@@ -17,11 +17,10 @@ public static class DownloadUtil {
             var tcs = new TaskCompletionSource<bool>();
 
             var downloadOpt = new DownloadConfiguration {
-                // ChunkCount = 1, // 设置并发块数
-                // MaxTryAgainOnFailure = 4, // 下载失败后重试次数
-                // ParallelDownload = true, // 启用并行下载 [ChunkCount]
+                ChunkCount = 1, // 单块下载，避免并发请求
+                MaxTryAgainOnFailover = 2, // 最多重试2次，避免429
+                ParallelDownload = false, // 禁用并行下载
                 EnableAutoResumeDownload = true // 启用自动续传功能
-                // HttpClientTimeout = 300_000, // 5 分钟超时
             };
 
             await using var downloader = new DownloadService(downloadOpt);
