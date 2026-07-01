@@ -47,7 +47,27 @@ public class EntityUpdateFile {
     }
 
     /**
-     * 检查单个文件更新
+     * 检查单个文件更新（串行/简单下载，用于 UI 更新避免 429）
+     * @param filePath 完整文件路径
+     */
+    public async Task<int> CheckUpdateSimple(string filePath, string safeSavePath, Action<double>? downloadProgress = null)
+    {
+        if (string.IsNullOrEmpty(_downloadUrl)) {
+            return 2;
+        }
+
+        // 检查是否需要更新
+        if (!NeedsUpdate(filePath)) {
+            return 0;
+        }
+
+        // 下载文件（使用简单下载，内部处理 429 重试）
+        var success = await DownloadUtil.DownloadSimpleAsync(_downloadUrl, safeSavePath, progressValue => { downloadProgress?.Invoke(progressValue); });
+        return success ? 1 : 3;
+    }
+
+    /**
+     * 检查单个文件更新（多线程下载，使用 Downloader 库）
      * @param filePath 完整文件路径
      */
     public async Task<int> CheckUpdate(string filePath, string safeSavePath, Action<double>? downloadProgress = null)

@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Downloader;
 using Nirvana.Common.Utils.Progress;
@@ -7,6 +10,62 @@ using Serilog;
 namespace Nirvana.Game.Launcher.Utils;
 
 public static class DownloadUtil {
+    private static readonly HttpClient SimpleHttpClient = new() {
+        Timeout = TimeSpan.FromMinutes(5)
+    };
+
+    /**
+     * 简单下载（不使用 Downloader 库），用于 UI 更新等需要避免 429 的场景
+     * 遇到 429 时等待 10 秒后重试
+     */
+    public static async Task<bool> DownloadSimpleAsync(string url, string destinationPath, Action<double>? downloadProgress = null)
+    {
+        const int maxRetries = 2;
+        for (var retry = 0; retry <= maxRetries; retry++) {
+            try {
+                using var response = await SimpleHttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) {
+                    var delay = (retry + 1) * 10; // 10s, 20s, 30s
+                    Log.Warning("429 Too Many Requests, waiting {0}s before retry {1}/{2}...", delay, retry + 1, maxRetries);
+                    await Task.Delay(delay * 1000);
+                    continue;
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var totalBytes = response.Content.Headers.ContentLength ?? -1;
+                await using var contentStream = await response.Content.ReadAsStreamAsync();
+                await using var fileStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
+
+                var buffer = new byte[8192];
+                var totalRead = 0L;
+                int read;
+                while ((read = await contentStream.ReadAsync(buffer)) > 0) {
+                    await fileStream.WriteAsync(buffer.AsMemory(0, read));
+                    totalRead += read;
+                    if (totalBytes > 0) {
+                        downloadProgress?.Invoke(100.0 * totalRead / totalBytes);
+                    }
+                }
+
+                return true;
+            } catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests) {
+                var delay = (retry + 1) * 10;
+                Log.Warning("429 Too Many Requests, waiting {0}s before retry {1}/{2}...", delay, retry + 1, maxRetries);
+                await Task.Delay(delay * 1000);
+            } catch (TaskCanceledException) {
+                Log.Information("Download canceled: {0}", url);
+                throw;
+            } catch (Exception ex) when (retry < maxRetries) {
+                Log.Warning("Download failed (retry {0}/{1}): {2}\n{3}", retry + 1, maxRetries, url, ex.Message);
+                await Task.Delay(3000);
+            }
+        }
+
+        throw new HttpRequestException($"Download failed after {maxRetries} retries: {url}");
+    }
+
     public static async Task<bool> DownloadAsync(string url, string destinationPath, Action<double>? downloadProgress = null)
     {
         try {

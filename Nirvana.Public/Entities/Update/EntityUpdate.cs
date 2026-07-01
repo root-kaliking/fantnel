@@ -188,7 +188,7 @@ public class EntityUpdate {
                 }
             }
 
-            var success = await CheckUpdateSingle(entityUpdate, filePath, safeSavePath);
+            var success = await entityUpdate.CheckUpdateSimple(filePath, safeSavePath);
             if (success == 1) {
                 count++;
             }
